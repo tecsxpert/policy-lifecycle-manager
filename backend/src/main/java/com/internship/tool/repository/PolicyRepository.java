@@ -40,15 +40,15 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
        long countByStatus(String status);
 
        /**
-        * Finds policies with a status other than the given one whose deadline is
+        * Finds policies with a status other than the given one whose expiry_date is
         * before the provided date.
         * Used by the overdue reminder scheduler.
         */
-       List<Policy> findByStatusNotAndDeadlineBefore(String status, LocalDate deadline);
+       List<Policy> findByStatusNotAndExpiryDateBefore(String status, LocalDate expiryDate);
 
        /**
-        * Finds policies with a deadline exactly matching the given date.
+        * Finds policies with an expiry_date exactly matching the given date.
         * Used by the advance alert scheduler.
         */
-       List<Policy> findByDeadline(LocalDate deadline);
+       List<Policy> findByExpiryDate(LocalDate expiryDate);
 }

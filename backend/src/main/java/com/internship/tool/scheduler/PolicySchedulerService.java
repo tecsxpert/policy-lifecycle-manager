@@ -16,30 +16,31 @@ public class PolicySchedulerService {
     private PolicyRepository policyRepository;
 
     /**
-     * Daily at 1:00 AM: Find policies that are not COMPLETED and whose deadline has
-     * passed.
+     * Daily at 1:00 AM: Find policies that are not COMPLETED and whose expiry_date
+     * is in the past.
      */
     @Scheduled(cron = "0 0 1 * * *")
     public void checkOverduePolicies() {
         LocalDate today = LocalDate.now();
-        List<Policy> overduePolicies = policyRepository.findByStatusNotAndDeadlineBefore("COMPLETED", today);
+        List<Policy> overduePolicies = policyRepository.findByStatusNotAndExpiryDateBefore("COMPLETED", today);
 
         if (overduePolicies.isEmpty()) {
             System.out.println("[Overdue Check] No overdue policies found.");
         } else {
             System.out.println("[Overdue Check] Found " + overduePolicies.size() + " overdue policy(ies):");
             overduePolicies.forEach(
-                    p -> System.out.println("  - " + p.getPolicyName() + " (deadline: " + p.getDeadline() + ")"));
+                    p -> System.out.println("  - " + p.getPolicyName() + " (expiry_date: " + p.getExpiryDate() + ")"));
         }
     }
 
     /**
-     * Daily at 2:00 AM: Find policies with a deadline exactly 7 days from today.
+     * Daily at 2:00 AM: Find policies with an expiry_date exactly 7 days from
+     * today.
      */
     @Scheduled(cron = "0 0 2 * * *")
     public void checkExpiringSoonPolicies() {
         LocalDate sevenDaysFromNow = LocalDate.now().plusDays(7);
-        List<Policy> expiringSoon = policyRepository.findByDeadline(sevenDaysFromNow);
+        List<Policy> expiringSoon = policyRepository.findByExpiryDate(sevenDaysFromNow);
 
         if (expiringSoon.isEmpty()) {
             System.out.println("[Expiring Soon Check] No policies expiring on " + sevenDaysFromNow + ".");
