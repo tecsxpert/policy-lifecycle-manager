@@ -4,6 +4,7 @@ import com.internship.tool.entity.Policy;
 import com.internship.tool.repository.PolicyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,9 @@ public class PolicyController {
 
     /**
      * Updates an existing policy by ID.
+     * Restricted to ADMIN and MANAGER roles.
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<Policy> updatePolicy(@PathVariable Long id, @RequestBody Policy policyDetails) {
         return policyRepository.findById(id)
@@ -38,7 +41,9 @@ public class PolicyController {
 
     /**
      * Performs a soft delete by updating the policy status to 'DELETED'.
+     * Restricted to ADMIN role only.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> softDeletePolicy(@PathVariable Long id) {
         return policyRepository.findById(id)
@@ -53,7 +58,9 @@ public class PolicyController {
 
     /**
      * Searches policies by name or policy holder using a query parameter.
+     * Accessible by all authenticated roles.
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'VIEWER')")
     @GetMapping("/search")
     public ResponseEntity<List<Policy>> searchPolicies(@RequestParam(name = "q") String q) {
         List<Policy> results = policyRepository.searchByNameOrHolder(q);
@@ -62,7 +69,9 @@ public class PolicyController {
 
     /**
      * Returns basic KPI stats for policies.
+     * Accessible by all authenticated roles.
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'VIEWER')")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getPolicyStats() {
         long totalPolicies = policyRepository.count();
