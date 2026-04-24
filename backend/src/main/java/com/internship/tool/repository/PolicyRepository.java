@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,4 +38,17 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
         * Counts policies by their status for KPI / stats endpoints.
         */
        long countByStatus(String status);
+
+       /**
+        * Finds policies with a status other than the given one whose deadline is
+        * before the provided date.
+        * Used by the overdue reminder scheduler.
+        */
+       List<Policy> findByStatusNotAndDeadlineBefore(String status, LocalDate deadline);
+
+       /**
+        * Finds policies with a deadline exactly matching the given date.
+        * Used by the advance alert scheduler.
+        */
+       List<Policy> findByDeadline(LocalDate deadline);
 }
