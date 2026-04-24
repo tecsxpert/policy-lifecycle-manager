@@ -12,24 +12,29 @@ import java.util.List;
 @Repository
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
 
-    /**
-     * Searches policies by a keyword that matches either the policy name or the policy holder.
-     * Uses a case-insensitive partial match.
-     */
-    @Query("SELECT p FROM Policy p WHERE LOWER(p.policyName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-           "OR LOWER(p.policyHolder) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<Policy> searchByNameOrHolder(@Param("searchTerm") String searchTerm);
+       /**
+        * Searches policies by a keyword that matches either the policy name or the
+        * policy holder.
+        * Uses a case-insensitive partial match.
+        */
+       @Query("SELECT p FROM Policy p WHERE LOWER(p.policyName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+                     "OR LOWER(p.policyHolder) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+       List<Policy> searchByNameOrHolder(@Param("searchTerm") String searchTerm);
 
-    /**
-     * Filters policies by their status (e.g., 'Active', 'Pending').
-     */
-    List<Policy> findByStatus(String status);
+       /**
+        * Filters policies by their status (e.g., 'Active', 'Pending').
+        */
+       List<Policy> findByStatus(String status);
 
-    /**
-     * Finds policies created within a specific date range.
-     */
-    @Query("SELECT p FROM Policy p WHERE p.createdAt BETWEEN :startDate AND :endDate")
-    List<Policy> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate,
-                                        @Param("endDate") LocalDateTime endDate);
+       /**
+        * Finds policies created within a specific date range.
+        */
+       @Query("SELECT p FROM Policy p WHERE p.createdAt BETWEEN :startDate AND :endDate")
+       List<Policy> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate,
+                     @Param("endDate") LocalDateTime endDate);
+
+       /**
+        * Counts policies by their status for KPI / stats endpoints.
+        */
+       long countByStatus(String status);
 }
-
