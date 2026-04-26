@@ -17,12 +17,52 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - policy-network
 
-  app:
+  redis:
+    image: redis:7-alpine
+    container_name: policy-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - policy-network
+
+  ai:
+    image: python:3.11-slim
+    container_name: policy-ai
+    working_dir: /app
+    command: >
+      sh -c "pip install flask &&
+             echo 'from flask import Flask; app = Flask(__name__);
+             @app.route(\"/health\") def health(): return {\"status\": \"ok\"};
+             @app.route(\"/predict\", methods=[\"POST\"]) def predict(): return {\"result\": \"mock\"};
+             if __name__ == \"__main__\": app.run(host=\"0.0.0.0\", port=5000)' > app.py &&
+             python app.py"
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - policy-network
+
+  backend:
     build: ./backend
-    container_name: policy-app
+    container_name: policy-backend
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/policydb
@@ -30,10 +70,32 @@ services:
       SPRING_DATASOURCE_PASSWORD: policypass
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: "true"
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      AI_SERVICE_URL: http://ai:5000
     ports:
       - "8080:8080"
     restart: unless-stopped
+    networks:
+      - policy-network
+
+  frontend:
+    image: nginx:alpine
+    container_name: policy-frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - policy-network
 
 volumes:
   postgres_data:
+
+networks:
+  policy-network:
+    driver: bridge
 
