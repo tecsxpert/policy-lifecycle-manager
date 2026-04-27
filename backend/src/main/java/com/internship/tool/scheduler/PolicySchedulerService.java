@@ -5,8 +5,11 @@ import com.internship.tool.repository.PolicyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,17 +19,22 @@ public class PolicySchedulerService {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicySchedulerService.class);
 
+    /** Maximum number of policies to load into memory per scheduler run. */
+    private static final int MAX_SCHEDULER_RESULTS = 500;
+
     @Autowired
     private PolicyRepository policyRepository;
 
     /**
      * Daily at 1:00 AM: Find policies that are not COMPLETED and whose expiry_date
-     * is in the past.
+     * is in the past. Capped at 500 results to prevent OOM during live demo.
      */
     @Scheduled(cron = "0 0 1 * * *")
+    @Transactional(readOnly = true)
     public void checkOverduePolicies() {
         LocalDate today = LocalDate.now();
-        List<Policy> overduePolicies = policyRepository.findByStatusNotAndExpiryDateBefore("COMPLETED", today);
+        Pageable limit = PageRequest.of(0, MAX_SCHEDULER_RESULTS);
+        List<Policy> overduePolicies = policyRepository.findByStatusNotAndExpiryDateBefore("COMPLETED", today, limit);
 
         if (overduePolicies.isEmpty()) {
             logger.info("[Overdue Check] No overdue policies found.");
@@ -39,12 +47,14 @@ public class PolicySchedulerService {
 
     /**
      * Daily at 2:00 AM: Find policies with an expiry_date exactly 7 days from
-     * today.
+     * today. Capped at 500 results to prevent OOM during live demo.
      */
     @Scheduled(cron = "0 0 2 * * *")
+    @Transactional(readOnly = true)
     public void checkExpiringSoonPolicies() {
         LocalDate sevenDaysFromNow = LocalDate.now().plusDays(7);
-        List<Policy> expiringSoon = policyRepository.findByExpiryDate(sevenDaysFromNow);
+        Pageable limit = PageRequest.of(0, MAX_SCHEDULER_RESULTS);
+        List<Policy> expiringSoon = policyRepository.findByExpiryDate(sevenDaysFromNow, limit);
 
         if (expiringSoon.isEmpty()) {
             logger.info("[Expiring Soon Check] No policies expiring on {}.", sevenDaysFromNow);
@@ -59,6 +69,7 @@ public class PolicySchedulerService {
      * Every Monday at 9:00 AM: Generate a weekly summary of policy activity.
      */
     @Scheduled(cron = "0 0 9 * * MON")
+    @Transactional(readOnly = true)
     public void generateWeeklySummary() {
         long totalPolicies = policyRepository.count();
         long activePolicies = policyRepository.countByStatus("Active");

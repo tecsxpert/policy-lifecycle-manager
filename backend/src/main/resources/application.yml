@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/policydb
     username: policyuser
-    password: policypass
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -34,11 +34,16 @@ spring:
       port: 6379
       timeout: 2000ms
 
+  task:
+    scheduling:
+      pool:
+        size: 5
+
 server:
   port: 8080
 
 jwt:
-  secret: bXlzdXBlcnNlY3JldGtleWZvcnRvb2wyOXBvbGljeWxpZmVjeWNsZQ==
+  secret: ${JWT_SECRET:}
   expiration-ms: 86400000
 
 logging:

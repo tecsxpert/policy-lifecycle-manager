@@ -17,6 +17,8 @@ spring:
     enabled: false
 
 jwt:
+  # TEST-ONLY SECRET — never use in production.
+  # This key is intentionally hardcoded for unit/integration test stability.
   secret: dGVzdHNlY3JldGtleWZvcnRlc3Rpbmdvbmx5dGVzdHNlY3JldA==
   expiration-ms: 3600000
 

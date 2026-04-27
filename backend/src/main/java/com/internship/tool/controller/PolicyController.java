@@ -2,6 +2,7 @@ package com.internship.tool.controller;
 
 import com.internship.tool.entity.Policy;
 import com.internship.tool.repository.PolicyRepository;
+import com.internship.tool.util.InputSanitizer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -77,6 +78,10 @@ public class PolicyController {
             )
             @RequestBody Policy policy) {
         policy.setIsDeleted(false);
+        policy.setPolicyName(InputSanitizer.sanitize(policy.getPolicyName()));
+        policy.setPolicyType(InputSanitizer.sanitize(policy.getPolicyType()));
+        policy.setStatus(InputSanitizer.sanitize(policy.getStatus()));
+        policy.setPolicyHolder(InputSanitizer.sanitize(policy.getPolicyHolder()));
         Policy saved = policyRepository.save(policy);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -106,10 +111,10 @@ public class PolicyController {
             @RequestBody Policy policyDetails) {
         return policyRepository.findByIdAndIsDeletedFalse(id)
                 .map(policy -> {
-                    policy.setPolicyName(policyDetails.getPolicyName());
-                    policy.setPolicyType(policyDetails.getPolicyType());
-                    policy.setStatus(policyDetails.getStatus());
-                    policy.setPolicyHolder(policyDetails.getPolicyHolder());
+                    policy.setPolicyName(InputSanitizer.sanitize(policyDetails.getPolicyName()));
+                    policy.setPolicyType(InputSanitizer.sanitize(policyDetails.getPolicyType()));
+                    policy.setStatus(InputSanitizer.sanitize(policyDetails.getStatus()));
+                    policy.setPolicyHolder(InputSanitizer.sanitize(policyDetails.getPolicyHolder()));
                     policy.setExpiryDate(policyDetails.getExpiryDate());
                     Policy updatedPolicy = policyRepository.save(policy);
                     return ResponseEntity.ok(updatedPolicy);
@@ -157,7 +162,8 @@ public class PolicyController {
     public ResponseEntity<List<Policy>> searchPolicies(
             @Parameter(description = "Search term for policy name or holder", example = "John")
             @RequestParam(name = "q") String q) {
-        List<Policy> results = policyRepository.searchByNameOrHolder(q);
+        String sanitizedQuery = InputSanitizer.sanitize(q);
+        List<Policy> results = policyRepository.searchByNameOrHolder(sanitizedQuery);
         return ResponseEntity.ok(results);
     }
 

@@ -2,6 +2,7 @@ package com.internship.tool.controller;
 
 import com.internship.tool.entity.User;
 import com.internship.tool.repository.UserRepository;
+import com.internship.tool.util.InputSanitizer;
 import com.internship.tool.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,9 +67,9 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setUsername(request.username());
-        user.setPassword(passwordEncoder.encode(request.password()));
-        user.setEmail(request.email());
+        user.setUsername(InputSanitizer.sanitize(request.username()));
+        user.setPassword(passwordEncoder.encode(InputSanitizer.trim(request.password())));
+        user.setEmail(InputSanitizer.sanitize(request.email()));
         user.setRole("VIEWER");
 
         userRepository.save(user);

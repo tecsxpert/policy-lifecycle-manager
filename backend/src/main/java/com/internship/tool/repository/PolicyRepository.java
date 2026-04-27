@@ -54,16 +54,17 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
 
        /**
         * Finds policies with a status other than the given one whose expiry_date is
-        * before the provided date.
+        * before the provided date. Supports pagination to cap result size.
         * Used by the overdue reminder scheduler.
         */
-       List<Policy> findByStatusNotAndExpiryDateBefore(String status, LocalDate expiryDate);
+       List<Policy> findByStatusNotAndExpiryDateBefore(String status, LocalDate expiryDate, org.springframework.data.domain.Pageable pageable);
 
        /**
         * Finds policies with an expiry_date exactly matching the given date.
+        * Supports pagination to cap result size.
         * Used by the advance alert scheduler.
         */
-       List<Policy> findByExpiryDate(LocalDate expiryDate);
+       List<Policy> findByExpiryDate(LocalDate expiryDate, org.springframework.data.domain.Pageable pageable);
 
        /**
         * Paginated list of non-deleted policies.

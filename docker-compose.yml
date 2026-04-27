@@ -41,12 +41,10 @@ services:
     env_file:
       - .env
     working_dir: /app
+    volumes:
+      - ./ai/app.py:/app/app.py:ro
     command: >
       sh -c "pip install flask gunicorn &&
-             echo 'from flask import Flask, jsonify; app = Flask(__name__);
-             @app.route(\"/health\") def health(): return jsonify({\"status\": \"ok\"});
-             @app.route(\"/predict\", methods=[\"POST\"]) def predict(): return jsonify({\"result\": \"mock\"});
-             if __name__ == \"__main__\": app.run(host=\"0.0.0.0\", port=5000)' > app.py &&
              gunicorn -w 2 -b 0.0.0.0:5000 app:app"
     ports:
       - "${AI_PORT}:5000"
