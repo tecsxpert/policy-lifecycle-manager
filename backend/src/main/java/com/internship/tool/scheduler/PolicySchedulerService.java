@@ -67,16 +67,17 @@ public class PolicySchedulerService {
 
     /**
      * Every Monday at 9:00 AM: Generate a weekly summary of policy activity.
+     * Excludes soft-deleted policies to ensure accurate reporting.
      */
     @Scheduled(cron = "0 0 9 * * MON")
     @Transactional(readOnly = true)
     public void generateWeeklySummary() {
-        long totalPolicies = policyRepository.count();
-        long activePolicies = policyRepository.countByStatus("Active");
-        long pendingPolicies = policyRepository.countByStatus("Pending");
+        long totalPolicies = policyRepository.countByIsDeletedFalse();
+        long activePolicies = policyRepository.countByStatusAndIsDeletedFalse("Active");
+        long pendingPolicies = policyRepository.countByStatusAndIsDeletedFalse("Pending");
 
         logger.info("===== Weekly Policy Summary =====");
-        logger.info("Total Policies : {}", totalPolicies);
+        logger.info("Total Policies (excl. deleted) : {}", totalPolicies);
         logger.info("Active Policies: {}", activePolicies);
         logger.info("Pending Policies: {}", pendingPolicies);
         logger.info("=================================");

@@ -49,12 +49,25 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Extracts the real client IP address, respecting the X-Forwarded-For header
+     * when running behind a reverse proxy (e.g., Nginx in Docker).
+     */
+    private String extractClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            // X-Forwarded-For can contain multiple IPs; use the first (original client)
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String clientIp = request.getRemoteAddr();
+        String clientIp = extractClientIp(request);
         String path = request.getRequestURI();
 
         Bucket bucket = resolveBucket(clientIp, path);

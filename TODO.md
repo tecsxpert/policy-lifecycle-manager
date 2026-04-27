@@ -1,46 +1,55 @@
-# Day 15 — Feature Freeze & Final Security Sign-off
+# Day 16 — Documentation & Presentation Prep
 
 ## Deliverables Checklist
-- [x] Code Quality: All PRs reviewed and merged with zero hardcoded secrets.
-- [x] Security: SECURITY.md is complete and signed by all 6 members.
-- [x] Stability: The full stack starts cleanly via Docker on your new laptop.
+- [x] README.md complete with setup instructions and ASCII architecture diagram
+- [x] .env.example with all environment variables documented
+- [x] Zero P1/P2 bugs — all remaining critical/data errors fixed
+- [x] 4 security talking points prepared for demo
+- [ ] Git commit & push to update PR #3
 
 ## Implementation Steps
 
-### Phase 1 — Remove Hardcoded Secrets
-- [x] Update `application.yml` to use environment variables for DB password and JWT secret
-- [x] Update `application-test.yml` with test-only secret documentation
+### Phase 1 — Documentation
+- [x] Create `.env.example` (all vars from docker-compose.yml + application.yml)
+- [x] Rewrite root `README.md`:
+  - [x] Project overview
+  - [x] ASCII architecture diagram
+  - [x] Prerequisites section
+  - [x] Environment Variables reference table
+  - [x] Local dev & Docker setup instructions
+  - [x] API quick reference
+  - [x] Security talking points (4 bullets)
+  - [x] Known Issues section
+  - [x] 90-second demo script (Security & Infrastructure)
 
-### Phase 2 — Add Rate Limiting
-- [x] Add Bucket4j dependency to `pom.xml`
-- [x] Create `RateLimitingFilter.java` (100 req/min auth, 200 req/min policy)
-- [x] Register filter in `SecurityConfig.java`
+### Phase 2 — Final Bug Fixes (Zero P1/P2)
+- [x] Fix `PolicySchedulerService.generateWeeklySummary()` — counts exclude soft-deleted
+- [x] Fix `AuditAspect.java` — use `findByIdAndIsDeletedFalse()` for old-state capture
+- [x] Fix `RateLimitingFilter.java` — parse `X-Forwarded-For` for real client IP
+- [x] Fix `frontend/nginx.conf` — add `X-Forwarded-For` header
+- [x] Fix `backend/Dockerfile` — add non-root USER directive
+- [x] Fix `GlobalExceptionHandler.java` — add SLF4J logging + NullPointerException handler
 
-### Phase 3 — Add Input Sanitization
-- [x] Create `InputSanitizer.java` utility
-- [x] Apply sanitization in `AuthController.java`
-- [x] Apply sanitization in `PolicyController.java`
+### Phase 3 — Git
+- [x] Run `mvn clean test` to verify no regressions
+- [ ] Commit with: "Day 16 - Finalized README.md with architecture diagram and resolved remaining P2 bugs"
+- [ ] Push to update PR #3
 
-### Phase 4 — Fix Scheduled Job Performance / Memory Risk
-- [x] Add `@Transactional(readOnly = true)` to scheduler methods
-- [x] Add `spring.task.scheduling.pool.size=5` to `application.yml`
-- [x] Cap scheduler queries with `Pageable` limit (max 500 results)
+## Bug Fix Summary
 
-### Phase 5 — Create SECURITY.md
-- [x] Document JWT enforcement, rate limiting, input sanitization, secret management
-- [x] Include sign-off table for all 6 team members
-- [x] Add final-security-checklist section
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| P2-1 | `PolicySchedulerService.java` | `count()` included soft-deleted policies in weekly summary | Replaced with `countByIsDeletedFalse()` and `countByStatusAndIsDeletedFalse()` |
+| P2-2 | `AuditAspect.java` | `findById()` could audit an already-deleted policy | Replaced with `findByIdAndIsDeletedFalse()` |
+| P2-3 | `RateLimitingFilter.java` | `getRemoteAddr()` returned nginx proxy IP in Docker | Added `extractClientIp()` parsing `X-Forwarded-For` header |
+| P2-4 | `frontend/nginx.conf` | Missing `X-Forwarded-For` proxy header | Added `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` |
+| P2-5 | `backend/Dockerfile` | Missing non-root user (SECURITY.md claimed it existed) | Added `addgroup`, `adduser`, `COPY --chown`, `USER appuser` |
+| P2-6 | `GlobalExceptionHandler.java` | Silent failures, no NPE handler | Added SLF4J logger + `@ExceptionHandler(NullPointerException.class)` |
 
-### Phase 6 — Final Verification
-- [x] Regex search confirms zero hardcoded secrets in committed files
-- [x] Regex search confirms zero TODO/FIXME in Java source files
-- [ ] All JUnit tests pass (`mvn clean test`) — run locally
-- [ ] Docker Compose starts all 5 services cleanly — run locally
-
-## Git Commit
-```bash
-git add .
-git commit -m "Day 15 - Feature Freeze: Completed team code review and final security sign-off"
-git push my-origin sangeeta-work:main --force
-```
+## Known Issues (P3 — documented, not fixed now)
+| # | Issue | Why deferred |
+|---|-------|-----------|
+| P3-1 | Frontend is a static placeholder (no actual CRUD UI) | Demo focuses on backend API; frontend will be shown as architecture-only |
+| P3-2 | AI service (`ai/app.py`) is a mock stub | AI integration is Q2 enhancement; out of scope for sprint |
+| P3-3 | Rate limiting is in-memory only (no Redis backed) | DOCUMENTED in SECURITY.md Issue #1; requires Redis integration post-sprint |
 

@@ -47,13 +47,13 @@ public class AuditAspect {
         String oldValue = null;
         String newValue = null;
 
-        // Capture old state before proceeding
+        // Capture old state before proceeding (only for non-deleted policies)
         if ("updatePolicy".equals(methodName) && args.length > 0 && args[0] instanceof Long id) {
             entityId = id;
-            oldValue = serializePolicy(policyRepository.findById(id).orElse(null));
+            oldValue = serializePolicy(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
         } else if ("softDeletePolicy".equals(methodName) && args.length > 0 && args[0] instanceof Long id) {
             entityId = id;
-            oldValue = serializePolicy(policyRepository.findById(id).orElse(null));
+            oldValue = serializePolicy(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
         }
 
         // Proceed with the actual method
