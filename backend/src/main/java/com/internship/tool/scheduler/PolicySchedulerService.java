@@ -2,6 +2,7 @@ package com.internship.tool.scheduler;
 
 import com.internship.tool.entity.Policy;
 import com.internship.tool.repository.PolicyRepository;
+import com.internship.tool.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class PolicySchedulerService {
     @Autowired
     private PolicyRepository policyRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     /**
      * Daily at 1:00 AM: Find policies that are not COMPLETED and whose expiry_date
      * is in the past. Capped at 500 results to prevent OOM during live demo.
@@ -40,8 +44,10 @@ public class PolicySchedulerService {
             logger.info("[Overdue Check] No overdue policies found.");
         } else {
             logger.info("[Overdue Check] Found {} overdue policy(ies):", overduePolicies.size());
-            overduePolicies.forEach(
-                    p -> logger.info("  - {} (expiry_date: {})", p.getPolicyName(), p.getExpiryDate()));
+            overduePolicies.forEach(p -> {
+                logger.info("  - {} (expiry_date: {})", p.getPolicyName(), p.getExpiryDate());
+                emailService.sendOverdueReminderEmail("admin@policy.local", p.getPolicyName(), p.getPolicyHolder());
+            });
         }
     }
 
@@ -61,7 +67,10 @@ public class PolicySchedulerService {
         } else {
             logger.info("[Expiring Soon Check] Found {} policy(ies) expiring on {}:",
                     expiringSoon.size(), sevenDaysFromNow);
-            expiringSoon.forEach(p -> logger.info("  - {}", p.getPolicyName()));
+            expiringSoon.forEach(p -> {
+                logger.info("  - {}", p.getPolicyName());
+                emailService.sendExpiringSoonEmail("admin@policy.local", p.getPolicyName(), p.getPolicyHolder(), 7);
+            });
         }
     }
 

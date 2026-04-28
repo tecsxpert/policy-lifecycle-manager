@@ -2,20 +2,15 @@ package com.internship.tool.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "policies")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Schema(name = "Policy", description = "Insurance policy entity representing a lifecycle-managed policy record")
 public class Policy {
 
@@ -57,5 +52,121 @@ public class Policy {
     @UpdateTimestamp
     @Schema(description = "Timestamp when the policy was last updated", example = "2024-06-20T14:45:00", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime updatedAt;
+
+    public Policy() {
+    }
+
+    public Policy(Long id, String policyName, String policyType, String status, String policyHolder,
+                  LocalDate expiryDate, Boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.policyName = policyName;
+        this.policyType = policyType;
+        this.status = status;
+        this.policyHolder = policyHolder;
+        this.expiryDate = expiryDate;
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getPolicyName() {
+        return policyName;
+    }
+
+    public void setPolicyName(String policyName) {
+        this.policyName = policyName;
+    }
+
+    public String getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPolicyHolder() {
+        return policyHolder;
+    }
+
+    public void setPolicyHolder(String policyHolder) {
+        this.policyHolder = policyHolder;
+    }
+
+    public LocalDate getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Policy policy = (Policy) o;
+        return Objects.equals(id, policy.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Policy{" +
+                "id=" + id +
+                ", policyName='" + policyName + '\'' +
+                ", policyType='" + policyType + '\'' +
+                ", status='" + status + '\'' +
+                ", policyHolder='" + policyHolder + '\'' +
+                ", expiryDate=" + expiryDate +
+                ", isDeleted=" + isDeleted +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
 

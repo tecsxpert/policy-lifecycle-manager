@@ -16,6 +16,10 @@ spring:
   flyway:
     enabled: false
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
 jwt:
   # TEST-ONLY SECRET — never use in production.
   # This key is intentionally hardcoded for unit/integration test stability.

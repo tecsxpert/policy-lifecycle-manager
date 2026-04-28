@@ -9,7 +9,7 @@
 - [ ] Team dry run with stopwatch — identify transition gaps
 - [ ] Fix any rehearsal issues (data loading, awkward handoffs)
 - [ ] Re-test all 5 demo scenarios after fixes
-- [ ] Git commit & push Day 17 updates
+- [x] Git commit & push Day 17 updates
 
 ## Implementation Steps
 
@@ -41,8 +41,8 @@
 - [x] Handoff from You (Audit done) → Frontend / Next speaker
 
 ### Phase 6 — Git
-- [ ] Commit with: "Day 17 - Added presentation slides, rehearsal script, and Q&A prep"
-- [ ] Push to update PR #3
+- [x] Commit with: "Day 17 - Added presentation slides, rehearsal script, and Q&A prep"
+- [x] Push to update PR #3
 
 ## Known Issues (P3 — documented, not fixed now)
 | # | Issue | Why deferred |

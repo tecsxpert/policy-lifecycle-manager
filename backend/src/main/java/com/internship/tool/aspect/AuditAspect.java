@@ -1,6 +1,7 @@
 package com.internship.tool.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.internship.tool.dto.PolicyResponse;
 import com.internship.tool.entity.AuditLog;
 import com.internship.tool.entity.Policy;
 import com.internship.tool.repository.AuditRepository;
@@ -33,10 +34,6 @@ public class AuditAspect {
     @Autowired
     private ObjectMapper objectMapper;
 
-    /**
-     * Intercepts all methods in PolicyController to create audit log entries.
-     * Captures old and new values as JSON for create, update, and delete operations.
-     */
     @Around("execution(* com.internship.tool.controller.PolicyController.*(..))")
     public Object auditPolicyAction(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
@@ -47,13 +44,13 @@ public class AuditAspect {
         String oldValue = null;
         String newValue = null;
 
-        // Capture old state before proceeding (only for non-deleted policies)
+        // Capture old state before proceeding
         if ("updatePolicy".equals(methodName) && args.length > 0 && args[0] instanceof Long id) {
             entityId = id;
-            oldValue = serializePolicy(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
+            oldValue = serializeObject(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
         } else if ("softDeletePolicy".equals(methodName) && args.length > 0 && args[0] instanceof Long id) {
             entityId = id;
-            oldValue = serializePolicy(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
+            oldValue = serializeObject(policyRepository.findByIdAndIsDeletedFalse(id).orElse(null));
         }
 
         // Proceed with the actual method
@@ -62,22 +59,27 @@ public class AuditAspect {
         // Determine action and capture new state
         if ("createPolicy".equals(methodName)) {
             action = "POLICY_CREATED";
-            entityId = extractPolicyIdFromResult(result);
-            newValue = serializePolicy(extractPolicyFromResult(result));
+            entityId = extractIdFromResult(result);
+            newValue = serializeObject(fetchPolicyById(entityId));
         } else if ("updatePolicy".equals(methodName)) {
             action = "POLICY_UPDATED";
             if (entityId == null) {
-                entityId = extractPolicyIdFromResult(result);
+                entityId = extractIdFromResult(result);
             }
-            newValue = serializePolicy(extractPolicyFromResult(result));
+            newValue = serializeObject(fetchPolicyById(entityId));
         } else if ("softDeletePolicy".equals(methodName)) {
             action = "POLICY_DELETED";
             if (entityId == null && args.length > 0 && args[0] instanceof Long) {
                 entityId = (Long) args[0];
             }
-            newValue = serializePolicy(extractPolicyFromResult(result));
+            newValue = serializeObject(fetchPolicyById(entityId));
         } else {
-            // Skip read-only / search / stats methods
+            return result;
+        }
+
+        // Skip audit if we couldn't determine an entity ID (should not happen, but safety check)
+        if (entityId == null) {
+            logger.warn("Audit skipped: could not determine entityId for method={}", methodName);
             return result;
         }
 
@@ -98,28 +100,28 @@ public class AuditAspect {
         return result;
     }
 
-    private String serializePolicy(Policy policy) {
-        if (policy == null) {
+    private Policy fetchPolicyById(Long id) {
+        if (id == null) return null;
+        return policyRepository.findById(id).orElse(null);
+    }
+
+    private String serializeObject(Object obj) {
+        if (obj == null) {
             return null;
         }
         try {
-            return objectMapper.writeValueAsString(policy);
+            return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            logger.warn("Failed to serialize policy for audit log", e);
+            logger.warn("Failed to serialize object for audit log", e);
             return "{\"error\": \"serialization_failed\"}";
         }
     }
 
-    private Policy extractPolicyFromResult(Object result) {
-        if (result instanceof ResponseEntity<?> response && response.getBody() instanceof Policy policy) {
-            return policy;
+    private Long extractIdFromResult(Object result) {
+        if (result instanceof ResponseEntity<?> response && response.getBody() instanceof PolicyResponse dto) {
+            return dto.getId();
         }
         return null;
-    }
-
-    private Long extractPolicyIdFromResult(Object result) {
-        Policy policy = extractPolicyFromResult(result);
-        return policy != null ? policy.getId() : null;
     }
 
     private String getCurrentUsername() {

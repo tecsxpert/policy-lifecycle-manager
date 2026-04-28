@@ -3,6 +3,7 @@ package com.internship.tool.config;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +36,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private Bucket createBucket(long capacity) {
         return Bucket.builder()
-                .addLimit(Bandwidth.simple(capacity, Duration.ofMinutes(1)))
+                .addLimit(Bandwidth.classic(capacity, Refill.intervally(capacity, Duration.ofMinutes(1))))
                 .build();
     }
 
@@ -87,4 +88,3 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
     }
 }
-

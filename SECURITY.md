@@ -85,7 +85,7 @@ By signing below, each team member confirms they have reviewed the codebase, ver
 
 | # | Name | Role | Area of Ownership | Signature | Date |
 |---|------|------|-------------------|-----------|------|
-| 1 | Sangeeta Sharma | Java Developer 2 | Audit Logging, Soft Delete, Flyway, Rate Limiting, Input Sanitization | ✅ Signed | 2026-05-02 |
+| 1 | Sangeeta Sharma | Java Developer 2 | Audit Logging, Soft Delete, Flyway, Rate Limiting, Input Sanitization | ✅ Signed | 2026-05-03 |
 | 2 | [Team Member 1] | Java Developer 1 | Authentication, JWT, User Management | ⬜ Pending | — |
 | 3 | [Team Member 2] | Frontend Developer | React UI, CORS, API Integration | ⬜ Pending | — |
 | 4 | [Team Member 3] | DevOps Engineer | Docker, CI/CD, Deployment | ⬜ Pending | — |
@@ -121,5 +121,4 @@ The following enhancements were identified during the Feature Freeze but deferre
 ---
 
 **Document Owner:** Sangeeta Sharma (Java Developer 2)  
-**Last Updated:** 2026-05-02
-
+**Last Updated:** 2026-05-03
