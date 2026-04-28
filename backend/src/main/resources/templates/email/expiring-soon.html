@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Policy Expiring Soon</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.5; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f39c12; color: #fff; padding: 20px; text-align: center; }
+        .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        .footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
+        .reminder { color: #f39c12; font-weight: bold; }
+        .policy-name { font-weight: bold; color: #f39c12; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Reminder: Policy Expiring Soon</h1>
+    </div>
+    <div class="content">
+        <p>Hello <span th:text="${policyHolder}">Policy Holder</span>,</p>
+        <p class="reminder">Your policy <span class="policy-name" th:text="${policyName}">Policy Name</span> will expire in <span th:text="${daysRemaining}">7</span> days.</p>
+        <p>Please renew before the expiry date to maintain continuous coverage and avoid any gaps in protection.</p>
+    </div>
+    <div class="footer">
+        <p>Regards,<br>Policy Lifecycle Manager Team</p>
+    </div>
+</div>
+</body>
+</html>
+

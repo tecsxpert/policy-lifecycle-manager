@@ -16,6 +16,10 @@ spring:
   flyway:
     enabled: false
 
+  thymeleaf:
+    check-template-location: false
+    enabled: true
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -25,4 +29,3 @@ jwt:
   # This key is intentionally hardcoded for unit/integration test stability.
   secret: dGVzdHNlY3JldGtleWZvcnRlc3Rpbmdvbmx5dGVzdHNlY3JldA==
   expiration-ms: 3600000
-

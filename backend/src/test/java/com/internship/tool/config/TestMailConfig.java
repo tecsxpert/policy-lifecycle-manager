@@ -17,4 +17,3 @@ public class TestMailConfig {
         return Mockito.mock(JavaMailSender.class);
     }
 }
-
