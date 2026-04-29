@@ -1,0 +1,6 @@
+.env
+test.json
+*.pyc
+vectorstore.pkl
+*.pkl
+chroma_db/
