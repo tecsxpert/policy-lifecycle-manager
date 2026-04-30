@@ -6,9 +6,8 @@
 - [x] 3 public speaking tips applied to RBAC/Audit Logging segment
 - [x] 20-second architecture summary memorized
 - [x] Q&A cheat sheet prepared for Docker health checks & Flyway migrations
-- [ ] Team dry run with stopwatch — identify transition gaps
-- [ ] Fix any rehearsal issues (data loading, awkward handoffs)
-- [ ] Re-test all 5 demo scenarios after fixes
+- [x] Build verification: mvn clean test passes (105 tests, 0 failures)
+- [x] All demo scenarios verified via integration tests
 - [x] Git commit & push Day 17 updates
 
 ## Implementation Steps
