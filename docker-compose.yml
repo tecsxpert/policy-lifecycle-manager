@@ -1,0 +1,116 @@
+# Policy Lifecycle Manager - Docker Compose
+# ALL 5 services required for Demo Day
+# backend, frontend, ai-service, postgres, redis
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: policy-postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "9000:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - policy-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: policy-redis
+    ports:
+      - "9001:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - policy-network
+
+  backend:
+    build: ./backend
+    container_name: policy-backend
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      AI_SERVICE_URL: http://ai-service:5000
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "9003:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - policy-network
+
+  frontend:
+    build: ./frontend
+    container_name: policy-frontend
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:9003
+      VITE_AI_SERVICE_URL: http://ai-service:5000
+    ports:
+      - "9002:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - policy-network
+
+  ai-service:
+    build: ./ai-service
+    container_name: policy-ai-service
+    env_file:
+      - .env
+    ports:
+      - "9004:5000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - policy-network
+
+volumes:
+  postgres_data:
+
+networks:
+  policy-network:
+    driver: bridge

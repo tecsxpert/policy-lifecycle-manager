@@ -1,0 +1,35 @@
+-- Flyway migration: V4__seed_data.sql
+-- Seeds 30 realistic demo policies for Demo Day
+
+INSERT INTO policies (policy_name, policy_type, status, policy_holder, expiry_date, is_deleted, created_at, updated_at) VALUES
+('AutoShield Premium', 'Auto Insurance', 'Active', 'John Smith', '2025-06-15', false, '2024-01-10 09:30:00', '2024-01-10 09:30:00'),
+('HomeGuard Basic', 'Home Insurance', 'Active', 'Sarah Johnson', '2025-08-20', false, '2024-01-12 14:20:00', '2024-01-12 14:20:00'),
+('LifeSecure Term 20', 'Life Insurance', 'Pending', 'Michael Brown', '2026-03-10', false, '2024-01-15 11:00:00', '2024-01-15 11:00:00'),
+('HealthFirst Platinum', 'Health Insurance', 'Active', 'Emily Davis', '2025-12-01', false, '2024-01-18 16:45:00', '2024-01-18 16:45:00'),
+('BizProtect SME', 'Business Insurance', 'Active', 'Robert Wilson', '2025-09-30', false, '2024-01-20 08:15:00', '2024-01-20 08:15:00'),
+('TravelSafe Global', 'Travel Insurance', 'Pending', 'Lisa Anderson', '2025-07-25', false, '2024-01-22 13:30:00', '2024-01-22 13:30:00'),
+('PetCare Plus', 'Pet Insurance', 'Active', 'David Martinez', '2025-11-18', false, '2024-01-25 10:00:00', '2024-01-25 10:00:00'),
+('MotorCycle Pro', 'Auto Insurance', 'Active', 'Jennifer Taylor', '2025-05-05', false, '2024-02-01 09:45:00', '2024-02-01 09:45:00'),
+('SeniorCare Gold', 'Health Insurance', 'Active', 'Thomas Robinson', '2025-10-12', false, '2024-02-05 15:20:00', '2024-02-05 15:20:00'),
+('StudentShield', 'Health Insurance', 'Pending', 'Amanda White', '2025-04-28', false, '2024-02-08 11:10:00', '2024-02-08 11:10:00'),
+('CommercialFleet Cover', 'Business Insurance', 'Active', 'Christopher Harris', '2025-08-08', false, '2024-02-10 14:00:00', '2024-02-10 14:00:00'),
+('FamilyTerm Life', 'Life Insurance', 'Active', 'Jessica Clark', '2026-01-15', false, '2024-02-12 08:30:00', '2024-02-12 08:30:00'),
+('RentersSafe', 'Home Insurance', 'Pending', 'Matthew Lewis', '2025-06-30', false, '2024-02-15 16:00:00', '2024-02-15 16:00:00'),
+('AdventureTravel', 'Travel Insurance', 'Active', 'Ashley Walker', '2025-03-20', false, '2024-02-18 10:45:00', '2024-02-18 10:45:00'),
+('ClassicCar Heritage', 'Auto Insurance', 'Active', 'Daniel Hall', '2025-09-15', false, '2024-02-20 13:15:00', '2024-02-20 13:15:00'),
+('DisabilityIncome Guard', 'Life Insurance', 'Pending', 'Nicole Allen', '2026-02-28', false, '2024-02-22 09:00:00', '2024-02-22 09:00:00'),
+('CondoMaster Policy', 'Home Insurance', 'Active', 'Ryan Young', '2025-07-10', false, '2024-02-25 14:30:00', '2024-02-25 14:30:00'),
+('GroupHealth Corp', 'Health Insurance', 'Active', 'Stephanie King', '2025-11-05', false, '2024-03-01 11:20:00', '2024-03-01 11:20:00'),
+('MarineYacht Cover', 'Business Insurance', 'Pending', 'Jason Wright', '2025-05-25', false, '2024-03-05 08:45:00', '2024-03-05 08:45:00'),
+('CyberRisk Shield', 'Business Insurance', 'Active', 'Melissa Lopez', '2025-12-20', false, '2024-03-08 15:00:00', '2024-03-08 15:00:00'),
+('GapCoverage Auto', 'Auto Insurance', 'Active', 'Kevin Hill', '2025-04-15', false, '2024-03-10 10:30:00', '2024-03-10 10:30:00'),
+('CriticalIllness Care', 'Health Insurance', 'Pending', 'Laura Scott', '2025-08-28', false, '2024-03-12 13:45:00', '2024-03-12 13:45:00'),
+('WholeLife Legacy', 'Life Insurance', 'Active', 'Mark Green', '2027-01-01', false, '2024-03-15 09:15:00', '2024-03-15 09:15:00'),
+('Snowbird Travel', 'Travel Insurance', 'Active', 'Rachel Adams', '2025-02-14', false, '2024-03-18 16:30:00', '2024-03-18 16:30:00'),
+('FarmersCrop Protect', 'Business Insurance', 'Active', 'Steven Baker', '2025-10-30', false, '2024-03-20 11:00:00', '2024-03-20 11:00:00'),
+('TelematicsDrive Safe', 'Auto Insurance', 'Pending', 'Rebecca Gonzalez', '2025-06-05', false, '2024-03-22 14:20:00', '2024-03-22 14:20:00'),
+('LongTermCare Wise', 'Health Insurance', 'Active', 'Edward Nelson', '2025-09-18', false, '2024-03-25 08:50:00', '2024-03-25 08:50:00'),
+('EventCancellation Pro', 'Travel Insurance', 'Pending', 'Michelle Carter', '2025-07-22', false, '2024-03-28 13:10:00', '2024-03-28 13:10:00'),
+('EmployeeBenefits Plus', 'Health Insurance', 'Active', 'Timothy Mitchell', '2025-11-12', false, '2024-04-01 10:00:00', '2024-04-01 10:00:00'),
+('RVRoadtrip Cover', 'Auto Insurance', 'Active', 'Angela Perez', '2025-05-18', false, '2024-04-05 15:40:00', '2024-04-05 15:40:00');
+

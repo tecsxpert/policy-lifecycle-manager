@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# Build output
+target/
+
+# Node.js dependencies
+node_modules/
+
+# Python cache
+.pycache/
+
+# Chroma vector DB data
+chroma_data/
+

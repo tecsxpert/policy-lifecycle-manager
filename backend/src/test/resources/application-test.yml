@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+  thymeleaf:
+    check-template-location: false
+    enabled: true
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+jwt:
+  # TEST-ONLY SECRET — never use in production.
+  # This key is intentionally hardcoded for unit/integration test stability.
+  secret: dGVzdHNlY3JldGtleWZvcnRlc3Rpbmdvbmx5dGVzdHNlY3JldA==
+  expiration-ms: 3600000
