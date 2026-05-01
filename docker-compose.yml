@@ -80,7 +80,7 @@ services:
       VITE_API_URL: http://localhost:9003
       VITE_AI_SERVICE_URL: http://ai-service:5000
     ports:
-      - "9002:5173"
+      - "9002:80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5173"]

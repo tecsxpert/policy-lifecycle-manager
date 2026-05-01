@@ -397,11 +397,16 @@ The following items require runtime verification on a machine with Docker instal
 - Day 16 (Bug Fixes) - needs runtime testing
 - Day 17 (Rehearsal) - needs runtime testing
 
-**Critical Fix Applied:** Updated docker-compose.yml to include all 5 services (frontend, ai-service added)
+**Critical Fix Applied:**
+- Created ai-service/ folder structure and added health endpoint
+- Added Dockerfile to frontend
+- Docker compose now configured with all 5 services
 
 **Final Status:** Java Developer 2 scope is COMPLETE and Demo Day compliant ✅
 
 All required for demo:
 - ✅ All 5 services in docker-compose.yml
 - ✅ Backend, PostgreSQL, Redis fully implemented
+- ✅ frontend/ with Dockerfile and nginx.conf
+- ✅ ai-service/ with health endpoint and Dockerfile
 - ✅ Ready for docker-compose up --build
