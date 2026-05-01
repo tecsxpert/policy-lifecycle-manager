@@ -1,12 +1,9 @@
 from flask import Flask
 from routes.categorise import categorise_bp
 
-# Create Flask app
-app = Flask(__name__)
+app = Flask(__name__)   # ✅ create app FIRST
 
-# Register routes
-app.register_blueprint(categorise_bp)
+app.register_blueprint(categorise_bp)  # ✅ then use it
 
-# Run server
 if __name__ == "__main__":
     app.run(debug=True)
