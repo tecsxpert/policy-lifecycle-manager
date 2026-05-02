@@ -9,13 +9,13 @@ categorise_bp = Blueprint("categorise", __name__)
 def categorise():
     data = request.get_json()
 
-    # ✅ Validate input
+    # Validate input
     if not data or "text" not in data:
         return jsonify({"error": "Text is required"}), 400
 
     text = data["text"]
 
-    # ✅ Prompt
+    # Prompt
     prompt = f"""
 You are a strict text classification system.
 
@@ -39,10 +39,10 @@ Text:
 {text}
 """
 
-    # ✅ Call AI
+    # Call AI
     response = call_groq(prompt)
 
-    # ❌ If API failed
+    # If API failed
     if not response:
         return jsonify({
             "message": "AI service failed",
@@ -50,12 +50,12 @@ Text:
         })
 
     try:
-        # ✅ Try direct JSON
+        # Try direct JSON
         parsed = json.loads(response)
 
     except Exception:
         try:
-            # ✅ Extract JSON if extra text present
+            # Extract JSON if extra text present
             match = re.search(r"\{.*\}", response, re.DOTALL)
             if match:
                 parsed = json.loads(match.group())
@@ -69,7 +69,7 @@ Text:
                 "is_fallback": True
             })
 
-    # ✅ Final response
+    # Final response
     return jsonify({
         "category": parsed.get("category"),
         "confidence": parsed.get("confidence"),
