@@ -8,7 +8,7 @@ import time
 
 health_bp = Blueprint("health", __name__)
 
-# ✅ HEALTH ROUTE
+# HEALTH ROUTE
 @health_bp.route("/health", methods=["GET"])
 def health():
     return jsonify({
@@ -19,7 +19,7 @@ def health():
         "cache": get_cache_stats()
     })
 
-# ✅ TEST ROUTE (IMPORTANT)
+#  TEST ROUTE 
 @health_bp.route("/test", methods=["GET"])
 def test():
     start = time.time()
