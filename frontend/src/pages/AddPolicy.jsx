@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
-const DEMO_POLICIES = [
-  { id: 1, name: "Data Protection Policy", status: "Active", category: "Security", effectiveDate: "2024-01-01", expiryDate: "2025-01-01", description: "Covers all data handling procedures." },
-  { id: 2, name: "Remote Work Policy", status: "Pending", category: "HR", effectiveDate: "2024-03-01", expiryDate: "2025-03-01", description: "Guidelines for remote employees." },
-  { id: 3, name: "Leave Policy", status: "Active", category: "HR", effectiveDate: "2024-01-15", expiryDate: "2025-01-15", description: "Annual and sick leave rules." },
-  { id: 4, name: "IT Security Policy", status: "Expired", category: "Security", effectiveDate: "2023-01-01", expiryDate: "2024-01-01", description: "IT infrastructure security guidelines." },
-  { id: 5, name: "Travel Reimbursement", status: "Active", category: "Finance", effectiveDate: "2024-02-01", expiryDate: "2025-02-01", description: "Business travel expense rules." },
-];
+import { createPolicy, updatePolicy } from "../services/api";
 
 export default function AddPolicy() {
   const navigate = useNavigate();
@@ -16,52 +9,55 @@ export default function AddPolicy() {
   const editing = location.state;
 
   const [form, setForm] = useState({
-    id: editing?.id || null,
-    name: editing?.name || "",
-    category: editing?.category || "",
+    policyName: editing?.policyName || "",
+    policyType: editing?.policyType || "",
     status: editing?.status || "",
-    effectiveDate: editing?.effectiveDate || "",
+    policyHolder: editing?.policyHolder || "",
     expiryDate: editing?.expiryDate || "",
-    description: editing?.description || "",
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
+    setServerError("");
   };
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Policy name is required";
-    if (!form.category) e.category = "Category is required";
+    if (!form.policyName.trim()) e.policyName = "Policy name is required";
+    if (!form.policyType) e.policyType = "Policy type is required";
     if (!form.status) e.status = "Status is required";
-    if (!form.effectiveDate) e.effectiveDate = "Effective date is required";
+    if (!form.policyHolder.trim()) e.policyHolder = "Policy holder is required";
     if (!form.expiryDate) e.expiryDate = "Expiry date is required";
-    if (!form.description.trim()) e.description = "Description is required";
-    if (form.effectiveDate && form.expiryDate && form.expiryDate <= form.effectiveDate) {
-      e.expiryDate = "Expiry date must be after effective date";
-    }
     return e;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    const existing = JSON.parse(localStorage.getItem("policies") || "null") || DEMO_POLICIES;
-    let updated;
-    if (form.id) {
-      updated = existing.map(p => p.id === form.id ? { ...form } : p);
-    } else {
-      const newId = Math.max(...existing.map(p => p.id), 0) + 1;
-      updated = [...existing, { ...form, id: newId }];
+
+    setLoading(true);
+    try {
+      if (editing?.id) {
+        await updatePolicy(editing.id, form);
+      } else {
+        await createPolicy(form);
+      }
+      navigate("/list");
+    } catch (err) {
+      setServerError(
+        err.response?.data?.message || "Failed to save policy. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
-    localStorage.setItem("policies", JSON.stringify(updated));
-    navigate("/list");
   };
 
   const inputClass = (field) =>
@@ -76,8 +72,14 @@ export default function AddPolicy() {
         <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
 
           <h1 className="text-2xl font-bold mb-6 text-gray-800">
-            {form.id ? "✏️ Edit Policy" : "➕ Add New Policy"}
+            {editing?.id ? "✏️ Edit Policy" : "➕ Add New Policy"}
           </h1>
+
+          {serverError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <p className="text-red-600 text-sm">{serverError}</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -86,34 +88,36 @@ export default function AddPolicy() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Policy Name *</label>
               <input
                 type="text"
-                name="name"
-                value={form.name}
+                name="policyName"
+                value={form.policyName}
                 onChange={handleChange}
-                placeholder="Enter policy name"
-                className={inputClass("name")}
+                placeholder="e.g. AutoShield Premium"
+                className={inputClass("policyName")}
                 style={{ minHeight: "44px" }}
               />
-              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+              {errors.policyName && <p className="text-red-500 text-xs mt-1">{errors.policyName}</p>}
             </div>
 
-            {/* Category */}
+            {/* Policy Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Policy Type *</label>
               <select
-                name="category"
-                value={form.category}
+                name="policyType"
+                value={form.policyType}
                 onChange={handleChange}
-                className={inputClass("category")}
+                className={inputClass("policyType")}
                 style={{ minHeight: "44px" }}
               >
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option value="HR">HR</option>
                 <option value="Security">Security</option>
                 <option value="Finance">Finance</option>
                 <option value="Operations">Operations</option>
                 <option value="Legal">Legal</option>
+                <option value="Auto Insurance">Auto Insurance</option>
+                <option value="Health Insurance">Health Insurance</option>
               </select>
-              {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
+              {errors.policyType && <p className="text-red-500 text-xs mt-1">{errors.policyType}</p>}
             </div>
 
             {/* Status */}
@@ -129,23 +133,24 @@ export default function AddPolicy() {
                 <option value="">Select Status</option>
                 <option value="Active">Active</option>
                 <option value="Pending">Pending</option>
-                <option value="Expired">Expired</option>
+                <option value="COMPLETED">Completed</option>
               </select>
               {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
             </div>
 
-            {/* Effective Date */}
+            {/* Policy Holder */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Effective Date *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Policy Holder *</label>
               <input
-                type="date"
-                name="effectiveDate"
-                value={form.effectiveDate}
+                type="text"
+                name="policyHolder"
+                value={form.policyHolder}
                 onChange={handleChange}
-                className={inputClass("effectiveDate")}
+                placeholder="e.g. John Doe"
+                className={inputClass("policyHolder")}
                 style={{ minHeight: "44px" }}
               />
-              {errors.effectiveDate && <p className="text-red-500 text-xs mt-1">{errors.effectiveDate}</p>}
+              {errors.policyHolder && <p className="text-red-500 text-xs mt-1">{errors.policyHolder}</p>}
             </div>
 
             {/* Expiry Date */}
@@ -162,32 +167,17 @@ export default function AddPolicy() {
               {errors.expiryDate && <p className="text-red-500 text-xs mt-1">{errors.expiryDate}</p>}
             </div>
 
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Brief description of this policy..."
-                className={`border w-full p-3 rounded-lg focus:outline-none focus:ring-2 resize-none ${
-                  errors.description ? "border-red-500 focus:ring-red-300" : "border-gray-300 focus:ring-blue-300"
-                }`}
-              />
-              {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-            </div>
-
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3 mt-6">
             <button
               onClick={handleSubmit}
-              className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 flex-1"
+              disabled={loading}
+              className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 flex-1 disabled:opacity-60"
               style={{ backgroundColor: "#1B4F8A", minHeight: "44px" }}
             >
-              {form.id ? "Update Policy" : "Add Policy"}
+              {loading ? "Saving..." : editing?.id ? "Update Policy" : "Add Policy"}
             </button>
             <button
               onClick={() => navigate("/list")}
