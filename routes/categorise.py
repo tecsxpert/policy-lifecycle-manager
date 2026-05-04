@@ -1,55 +1,80 @@
 from flask import Blueprint, request, jsonify
 from services.groq_client import call_groq
 import json
+import re
 
 categorise_bp = Blueprint("categorise", __name__)
 
 @categorise_bp.route("/categorise", methods=["POST"])
 def categorise():
-    data = request.json
-    text = data.get("text", "")
+    data = request.get_json()
 
-    if not text:
+    # Validate input
+    if not data or "text" not in data:
         return jsonify({"error": "Text is required"}), 400
 
+    text = data["text"]
+
+    # Prompt
     prompt = f"""
-    You are an AI system that classifies policy-related text.
+You are a strict text classification system.
 
-    Categories:
-    - Compliance
-    - Security
-    - HR
-    - Finance
-    - Operations
+Classify the text into ONE category:
+["compliance", "security", "hr", "finance", "operations"]
 
-    Text:
-    {text}
+Rules:
+- Return ONLY JSON
+- No extra text
+- Confidence between 0 and 1
+- reasoning max 10 words
 
-    Return ONLY JSON:
-    {{
-      "category": "",
-      "confidence": 0.0,
-      "reasoning": ""
-    }}
-    """
+Output:
+{{
+  "category": "compliance",
+  "confidence": 0.95,
+  "reasoning": "policy related"
+}}
 
+Text:
+{text}
+"""
+
+    # Call AI
     response = call_groq(prompt)
 
-    try:
-        parsed = json.loads(response)
-
+    # If API failed
+    if not response:
         return jsonify({
-            "category": parsed.get("category"),
-            "confidence": parsed.get("confidence"),
-            "reasoning": parsed.get("reasoning"),
-            "meta": {
-                "cached": False
-            }
-        })
-
-    except Exception:
-        return jsonify({
-            "message": "Parsing failed",
-            "raw": response,
+            "message": "AI service failed",
             "is_fallback": True
         })
+
+    try:
+        # Try direct JSON
+        parsed = json.loads(response)
+
+    except Exception:
+        try:
+            # Extract JSON if extra text present
+            match = re.search(r"\{.*\}", response, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group())
+            else:
+                raise Exception("No JSON found")
+
+        except Exception:
+            return jsonify({
+                "message": "Parsing failed",
+                "raw": response,
+                "is_fallback": True
+            })
+
+    # Final response
+    return jsonify({
+        "category": parsed.get("category"),
+        "confidence": parsed.get("confidence"),
+        "reasoning": parsed.get("reasoning"),
+        "meta": {
+            "cached": False
+        }
+    })

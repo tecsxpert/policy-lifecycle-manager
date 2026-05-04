@@ -1,32 +1,19 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
 
-# Load embedding model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Persistent database client
+client = chromadb.PersistentClient(path="./chroma_db")
 
-# Create Chroma client (persistent)
-client = chromadb.Client()
+collection = client.get_or_create_collection(name="documents")
 
-# Create or get collection
-collection = client.get_or_create_collection(name="policy_docs")
-
-
-def add_document(doc_id, text):
-    embedding = model.encode(text).tolist()
-
+def add_document(text, id):
     collection.add(
-        ids=[doc_id],
-        embeddings=[embedding],
-        documents=[text]
+        documents=[text],
+        ids=[id]
     )
-
 
 def query_document(query_text):
-    query_embedding = model.encode(query_text).tolist()
-
     results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=3
+        query_texts=[query_text],
+        n_results=1
     )
-
     return results

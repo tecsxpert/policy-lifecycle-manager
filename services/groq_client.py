@@ -1,41 +1,39 @@
 import os
-import time
-import logging
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.ERROR)
+api_key = os.getenv("GROQ_API_KEY")
 
 def call_groq(prompt):
-    api_key = os.getenv("GROQ_API_KEY")
+    try:
+        url = "https://api.groq.com/openai/v1/chat/completions"
 
-    url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+        data = {
+            "model": "llama-3.1-8b-instant",   # ✅ WORKING MODEL
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
 
-    payload = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
-    }
+        response = requests.post(url, headers=headers, json=data)
 
-    for attempt in range(3):
-        try:
-            response = requests.post(url, headers=headers, json=payload)
+        print("STATUS:", response.status_code)
+        print("RAW:", response.text)
 
-            if response.status_code == 200:
-                data = response.json()
-                return data["choices"][0]["message"]["content"]
+        if response.status_code != 200:
+            return None
 
-        except Exception as e:
-            logging.error(str(e))
+        result = response.json()
 
-        time.sleep(2 ** attempt)
+        return result["choices"][0]["message"]["content"]
 
-    return "Failed after retries"
+    except Exception as e:
+        print("ERROR:", str(e))
+        return None
