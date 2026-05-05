@@ -16,3 +16,6 @@ spring:
 
   flyway:
     enabled: false
+
+jwt:
+  secret: policylifecyclemanager1234567890abcdefghijklmnopqrstuv
