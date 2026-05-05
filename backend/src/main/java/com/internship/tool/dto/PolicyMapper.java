@@ -60,7 +60,8 @@ public final class PolicyMapper {
                             String.join(", ",
                                     java.util.Arrays.stream(PolicyStatus.values())
                                             .map(Enum::name)
-                                            .toList())), ex);
+                                            .toList())),
+                    ex);
         }
     }
 }
