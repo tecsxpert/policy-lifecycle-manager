@@ -22,11 +22,13 @@ import com.internship.tool.exception.ResourceNotFoundException;
 public class PolicyServiceImpl implements PolicyService {
 
     private final PolicyRepository policyRepository;
+    private final EmailService emailService;
 
     @CacheEvict(value = "policies", allEntries = true)
     @Override
     public PolicyResponseDTO createPolicy(PolicyRequestDTO request) {
         Policy saved = policyRepository.save(PolicyMapper.toEntity(request));
+        emailService.sendPolicyCreatedEmail("knowmore089@gmail.com", saved.getPolicyName());
         return PolicyMapper.toResponse(saved);
     }
 

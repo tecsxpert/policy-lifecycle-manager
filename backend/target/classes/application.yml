@@ -19,5 +19,17 @@ spring:
   flyway:
     enabled: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: knowmore089@gmail.com
+    password: vpumwgykgckiavuk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret: policylifecyclemanager1234567890abcdefghijklmnopqrstuv

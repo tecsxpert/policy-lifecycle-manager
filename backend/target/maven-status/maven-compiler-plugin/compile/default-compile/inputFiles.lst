@@ -14,4 +14,5 @@ C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool
 C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool\exception\InvalidRequestException.java
 C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool\controller\PolicyController.java
 C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool\config\JwtUtil.java
+C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool\service\EmailService.java
 C:\Users\user\policy-lifecycle-manager\backend\src\main\java\com\internship\tool\dto\PolicyMapper.java

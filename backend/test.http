@@ -14,7 +14,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "policyNumber": "POL001",
+  "policyNumber": "POL003",
   "policyName": "Health Insurance",
   "policyType": "Health",
   "premiumAmount": 5000,
