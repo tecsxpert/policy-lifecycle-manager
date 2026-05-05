@@ -7,6 +7,8 @@ import com.internship.tool.entity.Policy;
 import com.internship.tool.entity.PolicyStatus;
 import com.internship.tool.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,20 +23,24 @@ public class PolicyServiceImpl implements PolicyService {
 
     private final PolicyRepository policyRepository;
 
+    @CacheEvict(value = "policies", allEntries = true)
     @Override
     public PolicyResponseDTO createPolicy(PolicyRequestDTO request) {
-        Policy policy = PolicyMapper.toEntity(request);
-        Policy savedPolicy = policyRepository.save(policy);
-        return PolicyMapper.toResponse(savedPolicy);
+        Policy saved = policyRepository.save(PolicyMapper.toEntity(request));
+        return PolicyMapper.toResponse(saved);
     }
 
+    @Cacheable("policies")
     @Override
     public List<PolicyResponseDTO> getAllPolicies() {
+        System.out.println("Fetching from DB...");
+
         return policyRepository.findAll().stream()
                 .map(PolicyMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "policy", key = "#id")
     @Override
     public PolicyResponseDTO getPolicyById(Long id) {
         Policy policy = policyRepository.findById(id)
@@ -42,6 +48,7 @@ public class PolicyServiceImpl implements PolicyService {
         return PolicyMapper.toResponse(policy);
     }
 
+    @CacheEvict(value = { "policies", "policy" }, allEntries = true)
     @Override
     public PolicyResponseDTO updatePolicy(Long id, PolicyRequestDTO request) {
         Policy existingPolicy = policyRepository.findById(id)
@@ -59,6 +66,7 @@ public class PolicyServiceImpl implements PolicyService {
         return PolicyMapper.toResponse(updatedPolicy);
     }
 
+    @CacheEvict(value = { "policies", "policy" }, allEntries = true)
     @Override
     public void deletePolicy(Long id) {
         if (!policyRepository.existsById(id)) {

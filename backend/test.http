@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:8080
-@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODAwMTE0MiwiZXhwIjoxNzc4MDg3NTQyfQ.p2NsWt5CnX7tiVGVqTwJAf0xFK9mA21CIAqPbSF4Flw
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODAwODE5NywiZXhwIjoxNzc4MDk0NTk3fQ.K-T_qNh6FYM6M9mEC43ez7EjQmmvC-d739HyYNyAMzs
 
 ### 1. GET all policies WITH JWT
 GET {{baseUrl}}/policies
