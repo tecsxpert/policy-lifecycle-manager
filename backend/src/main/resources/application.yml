@@ -1,0 +1,35 @@
+spring:
+  cache:
+    type: simple
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  flyway:
+    enabled: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: knowmore089@gmail.com
+    password: vpumwgykgckiavuk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: policylifecyclemanager1234567890abcdefghijklmnopqrstuv

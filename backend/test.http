@@ -1,0 +1,43 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODAwODE5NywiZXhwIjoxNzc4MDk0NTk3fQ.K-T_qNh6FYM6M9mEC43ez7EjQmmvC-d739HyYNyAMzs
+
+### 1. GET all policies WITH JWT
+GET {{baseUrl}}/policies
+Authorization: Bearer {{token}}
+
+### 2. GET all policies WITHOUT JWT (should return 401)
+GET {{baseUrl}}/policies
+
+### 3. CREATE policy WITH JWT
+POST {{baseUrl}}/policies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "policyNumber": "POL003",
+  "policyName": "Health Insurance",
+  "policyType": "Health",
+  "premiumAmount": 5000,
+  "startDate": "2024-01-01",
+  "endDate": "2025-01-01",
+  "status": "ACTIVE"
+}
+
+### 4. TEST INVALID ID (should return 404)
+GET {{baseUrl}}/policies/999
+Authorization: Bearer {{token}}
+
+### 5. TEST INVALID STATUS (should return 400)
+POST {{baseUrl}}/policies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "policyNumber": "POL999",
+  "policyName": "Test Policy",
+  "policyType": "Test",
+  "premiumAmount": 1000,
+  "startDate": "2024-01-01",
+  "endDate": "2025-01-01",
+  "status": "WRONG"
+}
