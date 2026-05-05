@@ -23,3 +23,21 @@ Authorization: Bearer {{token}}
   "status": "ACTIVE"
 }
 
+### 4. TEST INVALID ID (should return 404)
+GET {{baseUrl}}/policies/999
+Authorization: Bearer {{token}}
+
+### 5. TEST INVALID STATUS (should return 400)
+POST {{baseUrl}}/policies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "policyNumber": "POL999",
+  "policyName": "Test Policy",
+  "policyType": "Test",
+  "premiumAmount": 1000,
+  "startDate": "2024-01-01",
+  "endDate": "2025-01-01",
+  "status": "WRONG"
+}
