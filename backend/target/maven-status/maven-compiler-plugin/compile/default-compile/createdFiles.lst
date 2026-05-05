@@ -1,1 +1,4 @@
 com\internship\tool\PolicyLifecycleManagerApplication.class
+com\internship\tool\entity\PolicyStatus.class
+com\internship\tool\entity\Policy$PolicyBuilder.class
+com\internship\tool\entity\Policy.class
