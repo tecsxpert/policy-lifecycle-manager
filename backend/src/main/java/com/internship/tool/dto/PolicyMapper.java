@@ -2,6 +2,7 @@ package com.internship.tool.dto;
 
 import com.internship.tool.entity.Policy;
 import com.internship.tool.entity.PolicyStatus;
+import com.internship.tool.exception.InvalidRequestException;
 
 /**
  * Simple mapper between Policy entity and DTO representations.
@@ -49,13 +50,13 @@ public final class PolicyMapper {
 
     private static PolicyStatus toPolicyStatus(String status) {
         if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("Policy status must be provided");
+            throw new InvalidRequestException("Policy status must be provided");
         }
 
         try {
             return PolicyStatus.valueOf(status.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     String.format("Invalid policy status '%s'. Allowed values: %s", status,
                             String.join(", ",
                                     java.util.Arrays.stream(PolicyStatus.values())
