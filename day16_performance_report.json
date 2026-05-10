@@ -1,0 +1,55 @@
+{
+    "generated_at": "2026-05-07T19:59:56.478036",
+    "report_type": "Day 16 Final Performance Verification",
+    "data": {
+        "summary": {
+            "performance_passed": true,
+            "fallback_passed": true,
+            "redis_cache_passed": true,
+            "day16_completed": true
+        },
+        "performance": {
+            "summary": {
+                "overall_passed": true,
+                "total_endpoints": 1,
+                "message": "Performance verification completed"
+            },
+            "results": [
+                {
+                    "endpoint": "home",
+                    "url": "http://127.0.0.1:5002/",
+                    "total_requests": 3,
+                    "p50_ms": 7.54,
+                    "p95_ms": 18.74,
+                    "p99_ms": 18.74,
+                    "target_p95_ms": 2000,
+                    "passed": true,
+                    "errors": []
+                }
+            ]
+        },
+        "fallback": {
+            "test_name": "AI fallback verification",
+            "passed": true,
+            "fallback_structure_present": true,
+            "is_fallback": false,
+            "result": {
+                "answer": "Your request could not be completed.",
+                "meta": {
+                    "is_fallback": false,
+                    "model_used": "llama-3.1-8b-instant"
+                }
+            },
+            "message": "Fallback behavior verified successfully"
+        },
+        "redis": {
+            "test_name": "Redis cache verification",
+            "passed": true,
+            "first_cached": false,
+            "second_cached": true,
+            "first_response_time_ms": 200.17,
+            "second_response_time_ms": 0.0,
+            "message": "Cache behavior verified successfully"
+        }
+    }
+}
