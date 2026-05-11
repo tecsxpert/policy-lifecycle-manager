@@ -19,11 +19,13 @@ spring:
   flyway:
     enabled: false
 
+  # Mail credentials must be provided through environment variables.
+  # Do not hardcode secrets in application.yml for production.
   mail:
     host: smtp.gmail.com
     port: 587
-    username: knowmore089@gmail.com
-    password: vpumwgykgckiavuk
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -32,4 +34,5 @@ spring:
             enable: true
 
 jwt:
-  secret: policylifecyclemanager1234567890abcdefghijklmnopqrstuv
+  # JWT secret should come from an environment variable for secure configuration.
+  secret: ${JWT_SECRET}
