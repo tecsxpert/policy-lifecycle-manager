@@ -4,16 +4,17 @@ import com.internship.tool.dto.PolicyRequestDTO;
 import com.internship.tool.dto.PolicyResponseDTO;
 import com.internship.tool.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/policies")
@@ -35,11 +36,13 @@ public class PolicyController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all policies", description = "Retrieves all policies from the system (cached)")
+    @Operation(summary = "Get all policies with pagination", description = "Retrieves paginated policies from the system")
     @ApiResponse(responseCode = "200", description = "Policies fetched successfully")
     @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token required")
-    public ResponseEntity<List<PolicyResponseDTO>> getAllPolicies() {
-        List<PolicyResponseDTO> policies = policyService.getAllPolicies();
+    public ResponseEntity<Page<PolicyResponseDTO>> getAllPolicies(
+            @Parameter(description = "Page number (starting from 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of records per page") @RequestParam(defaultValue = "5") int size) {
+        Page<PolicyResponseDTO> policies = policyService.getAllPolicies(page, size);
         return ResponseEntity.ok(policies);
     }
 

@@ -9,10 +9,11 @@ import com.internship.tool.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Arrays;
 import com.internship.tool.exception.InvalidRequestException;
 import com.internship.tool.exception.ResourceNotFoundException;
@@ -28,18 +29,22 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     public PolicyResponseDTO createPolicy(PolicyRequestDTO request) {
         Policy saved = policyRepository.save(PolicyMapper.toEntity(request));
-        emailService.sendPolicyCreatedEmail("knowmore089@gmail.com", saved.getPolicyName());
+        emailService.sendPolicyCreatedEmail(
+                "knowmore089@gmail.com",
+                saved.getPolicyName(),
+                saved.getPolicyNumber(),
+                saved.getStatus().name());
         return PolicyMapper.toResponse(saved);
     }
 
-    @Cacheable("policies")
     @Override
-    public List<PolicyResponseDTO> getAllPolicies() {
-        System.out.println("Fetching from DB...");
+    public Page<PolicyResponseDTO> getAllPolicies(int page, int size) {
+        System.out.println("Fetching from DB... (page: " + page + ", size: " + size + ")");
 
-        return policyRepository.findAll().stream()
-                .map(PolicyMapper::toResponse)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Policy> policies = policyRepository.findAll(pageable);
+
+        return policies.map(PolicyMapper::toResponse);
     }
 
     @Cacheable(value = "policy", key = "#id")

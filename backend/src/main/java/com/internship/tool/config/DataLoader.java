@@ -57,7 +57,7 @@ public class DataLoader implements CommandLineRunner {
             return;
         }
 
-        List<Policy> policies = generateDemoPolicies(25);
+        List<Policy> policies = generateDemoPolicies(30);
         policyRepository.saveAll(policies);
         System.out.println("✅ Demo policies seeded successfully! Total: " + policies.size());
     }
@@ -82,16 +82,26 @@ public class DataLoader implements CommandLineRunner {
             String policyName = POLICY_NAMES[typeIndex] + " - " + policyNumber;
 
             // Randomize premium amount (1000 - 10000)
-            BigDecimal premiumAmount = new BigDecimal(1000 + random.nextInt(9001));
+            BigDecimal premiumAmount = BigDecimal.valueOf(1000 + random.nextInt(9001));
 
             // Randomize start date (within last 2 years)
             LocalDate startDate = today.minusDays(random.nextInt(730));
 
-            // Randomize end date (1-3 years after start date)
-            LocalDate endDate = startDate.plusDays(365 + random.nextInt(730));
+            // Randomize end date duration (6 months to 3 years)
+            LocalDate endDate = startDate.plusDays(180 + random.nextInt(660));
 
-            // Randomize status
-            PolicyStatus status = randomStatus();
+            // Ensure coverage for active, pending, and expired statuses
+            PolicyStatus status = randomStatus(i);
+
+            if (status == PolicyStatus.EXPIRED && !endDate.isBefore(today)) {
+                endDate = today.minusDays(random.nextInt(30) + 1);
+            }
+            if (status == PolicyStatus.PENDING && !endDate.isAfter(today)) {
+                endDate = today.plusDays(random.nextInt(30) + 1);
+            }
+            if (status == PolicyStatus.ACTIVE && !endDate.isAfter(today)) {
+                endDate = today.plusDays(random.nextInt(365) + 1);
+            }
 
             // Build and add policy
             Policy policy = Policy.builder()
@@ -111,11 +121,22 @@ public class DataLoader implements CommandLineRunner {
     }
 
     /**
-     * Return a random policy status
+     * Return a random policy status, while guaranteeing coverage for core statuses.
      *
-     * @return Random PolicyStatus enum value
+     * @param index Position within generated policies
+     * @return Selected PolicyStatus
      */
-    private PolicyStatus randomStatus() {
+    private PolicyStatus randomStatus(int index) {
+        if (index == 1) {
+            return PolicyStatus.ACTIVE;
+        }
+        if (index == 2) {
+            return PolicyStatus.PENDING;
+        }
+        if (index == 3) {
+            return PolicyStatus.EXPIRED;
+        }
+
         PolicyStatus[] statuses = PolicyStatus.values();
         return statuses[random.nextInt(statuses.length)];
     }

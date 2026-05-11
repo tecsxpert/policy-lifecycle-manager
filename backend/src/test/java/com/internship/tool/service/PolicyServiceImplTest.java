@@ -10,9 +10,13 @@ import com.internship.tool.repository.PolicyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -83,30 +87,32 @@ class PolicyServiceImplTest {
                 .status(PolicyStatus.PENDING)
                 .build();
 
-        when(policyRepository.findAll()).thenReturn(List.of(existingPolicy, secondPolicy));
+        Page<Policy> page = new PageImpl<>(List.of(existingPolicy, secondPolicy));
+        when(policyRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        List<PolicyResponseDTO> policies = policyService.getAllPolicies();
+        Page<PolicyResponseDTO> policies = policyService.getAllPolicies(0, 5);
 
         assertNotNull(policies);
-        assertEquals(2, policies.size());
-        assertEquals("POL1001", policies.get(0).getPolicyNumber());
-        assertEquals("POL1002", policies.get(1).getPolicyNumber());
-        assertEquals("Car Insurance Cover", policies.get(1).getPolicyName());
+        assertEquals(2, policies.getContent().size());
+        assertEquals("POL1001", policies.getContent().get(0).getPolicyNumber());
+        assertEquals("POL1002", policies.getContent().get(1).getPolicyNumber());
+        assertEquals("Car Insurance Cover", policies.getContent().get(1).getPolicyName());
 
-        verify(policyRepository, times(1)).findAll();
+        verify(policyRepository, times(1)).findAll(any(Pageable.class));
         verifyNoMoreInteractions(policyRepository, emailService);
     }
 
     @Test
     void shouldReturnEmptyListWhenNoPoliciesExist() {
-        when(policyRepository.findAll()).thenReturn(Collections.emptyList());
+        Page<Policy> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(policyRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
 
-        List<PolicyResponseDTO> policies = policyService.getAllPolicies();
+        Page<PolicyResponseDTO> policies = policyService.getAllPolicies(0, 5);
 
         assertNotNull(policies);
-        assertTrue(policies.isEmpty());
+        assertTrue(policies.getContent().isEmpty());
 
-        verify(policyRepository, times(1)).findAll();
+        verify(policyRepository, times(1)).findAll(any(Pageable.class));
         verifyNoMoreInteractions(policyRepository, emailService);
     }
 
@@ -158,7 +164,7 @@ class PolicyServiceImplTest {
         assertEquals("Health Insurance Premium", response.getPolicyName());
 
         verify(policyRepository, times(1)).save(any(Policy.class));
-        verify(emailService, times(1)).sendPolicyCreatedEmail(anyString(), anyString());
+        verify(emailService, times(1)).sendPolicyCreatedEmail(anyString(), anyString(), anyString(), anyString());
         verifyNoMoreInteractions(policyRepository);
     }
 
@@ -176,7 +182,7 @@ class PolicyServiceImplTest {
         assertThrows(InvalidRequestException.class, () -> policyService.createPolicy(invalidRequest));
 
         verify(policyRepository, never()).save(any(Policy.class));
-        verify(emailService, never()).sendPolicyCreatedEmail(anyString(), anyString());
+        verify(emailService, never()).sendPolicyCreatedEmail(anyString(), anyString(), anyString(), anyString());
         verifyNoMoreInteractions(policyRepository, emailService);
     }
 

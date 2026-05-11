@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Policy Expiry Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f6fb;
+            color: #2d3a50;
+            margin: 0;
+            padding: 0;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 18px 36px rgba(0,0,0,0.08);
+        }
+        .email-header {
+            background-color: #ff9f43;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+        .email-body {
+            padding: 24px;
+        }
+        .email-body p {
+            line-height: 1.7;
+            margin: 16px 0;
+        }
+        .details {
+            background-color: #f7f9fd;
+            border-radius: 10px;
+            border: 1px solid #e3eaf4;
+            padding: 18px;
+            margin: 20px 0;
+        }
+        .details p {
+            margin: 10px 0;
+        }
+        .label {
+            color: #556074;
+            font-size: 13px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .value {
+            color: #1f2937;
+            font-size: 16px;
+        }
+        .footer {
+            color: #657786;
+            font-size: 14px;
+            padding: 0 24px 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="email-header">
+        <h1>Policy Expiry Reminder</h1>
+    </div>
+    <div class="email-body">
+        <p>This is a friendly reminder that one of your policies is due to expire soon.</p>
+        <div class="details">
+            <p><span class="label">Policy Name</span><span class="value" th:text="${policyName}">Policy Name</span></p>
+            <p><span class="label">Policy Number</span><span class="value" th:text="${policyNumber}">POL1234</span></p>
+            <p><span class="label">Expiry Date</span><span class="value" th:text="${expiryDate}">2026-05-19</span></p>
+            <p><span class="label">Status</span><span class="value" th:text="${status}">ACTIVE</span></p>
+        </div>
+        <p>Please review your coverage and contact us if you would like to renew or update your policy details.</p>
+        <p class="footer">Policy Lifecycle Manager team</p>
+    </div>
+</div>
+</body>
+</html>
