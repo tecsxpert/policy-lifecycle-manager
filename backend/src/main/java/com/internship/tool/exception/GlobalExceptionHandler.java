@@ -37,7 +37,13 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        return buildResponse("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        // Print full stack trace in terminal for easier debugging
+        ex.printStackTrace();
+
+        // Return actual exception message in API response
+        return buildResponse(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
