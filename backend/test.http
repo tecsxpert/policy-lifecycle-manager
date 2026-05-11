@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:8080
-@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODAwODE5NywiZXhwIjoxNzc4MDk0NTk3fQ.K-T_qNh6FYM6M9mEC43ez7EjQmmvC-d739HyYNyAMzs
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODUwNzg4OSwiZXhwIjoxNzc4NTk0Mjg5fQ.3lRqm1WgG9MBsBtCo57vdbw5WoDeAK2_11Eg81h7VsE
 
 ### 1. GET all policies WITH JWT
 GET {{baseUrl}}/policies
@@ -41,3 +41,35 @@ Authorization: Bearer {{token}}
   "endDate": "2025-01-01",
   "status": "WRONG"
 }
+
+### 6. UPLOAD PDF FILE
+POST {{baseUrl}}/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ../test.pdf
+--WebAppBoundary--
+
+### 7. UPLOAD INVALID TXT FILE (should return 400)
+POST {{baseUrl}}/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+< ../test.txt
+--WebAppBoundary--
+
+### 8. DOWNLOAD FILE
+GET {{baseUrl}}/files/1
+Authorization: Bearer {{token}}
+
+### 9. PREVIEW FILE
+GET {{baseUrl}}/files/preview/1
+Authorization: Bearer {{token}}
