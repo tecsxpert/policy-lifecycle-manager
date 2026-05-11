@@ -1,14 +1,22 @@
 @baseUrl = http://localhost:8080
 @token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODUwNzg4OSwiZXhwIjoxNzc4NTk0Mjg5fQ.3lRqm1WgG9MBsBtCo57vdbw5WoDeAK2_11Eg81h7VsE
 
-### 1. GET all policies WITH JWT
+### Authentication
+
+### TEST: LOGIN
+GET {{baseUrl}}/auth/login?username=admin
+
+### Policy APIs
+
+### TEST: GET ALL POLICIES WITH JWT
 GET {{baseUrl}}/policies
 Authorization: Bearer {{token}}
 
-### 2. GET all policies WITHOUT JWT (should return 401)
-GET {{baseUrl}}/policies
+### TEST: GET POLICY BY ID (VALID)
+GET {{baseUrl}}/policies/1
+Authorization: Bearer {{token}}
 
-### 3. CREATE policy WITH JWT
+### TEST: CREATE POLICY
 POST {{baseUrl}}/policies
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -23,11 +31,16 @@ Authorization: Bearer {{token}}
   "status": "ACTIVE"
 }
 
-### 4. TEST INVALID ID (should return 404)
+### Validation tests
+
+### TEST: UNAUTHORIZED ACCESS (should return 401)
+GET {{baseUrl}}/policies
+
+### TEST: INVALID ID (should return 404)
 GET {{baseUrl}}/policies/999
 Authorization: Bearer {{token}}
 
-### 5. TEST INVALID STATUS (should return 400)
+### TEST: INVALID STATUS (should return 400)
 POST {{baseUrl}}/policies
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -42,7 +55,15 @@ Authorization: Bearer {{token}}
   "status": "WRONG"
 }
 
-### 6. UPLOAD PDF FILE
+### Cache tests
+
+### TEST: CACHE VERIFICATION (run twice, check logs for DB hit on first)
+GET {{baseUrl}}/policies
+Authorization: Bearer {{token}}
+
+### File upload tests
+
+### TEST: UPLOAD PDF FILE
 POST {{baseUrl}}/files/upload
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -54,7 +75,7 @@ Content-Type: application/pdf
 < ../test.pdf
 --WebAppBoundary--
 
-### 7. UPLOAD INVALID TXT FILE (should return 400)
+### TEST: UPLOAD INVALID TXT FILE (should return 400)
 POST {{baseUrl}}/files/upload
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -66,10 +87,23 @@ Content-Type: text/plain
 < ../test.txt
 --WebAppBoundary--
 
-### 8. DOWNLOAD FILE
+### TEST: DOWNLOAD FILE
 GET {{baseUrl}}/files/1
 Authorization: Bearer {{token}}
 
-### 9. PREVIEW FILE
+### TEST: PREVIEW FILE
 GET {{baseUrl}}/files/preview/1
 Authorization: Bearer {{token}}
+
+### Security tests
+
+### TEST: UNAUTHORIZED FILE UPLOAD (should return 401)
+POST {{baseUrl}}/files/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ../test.pdf
+--WebAppBoundary--
