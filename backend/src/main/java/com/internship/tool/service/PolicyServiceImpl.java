@@ -47,7 +47,7 @@ public class PolicyServiceImpl implements PolicyService {
         return policies.map(PolicyMapper::toResponse);
     }
 
-    @Cacheable(value = "policy", key = "#id")
+    @Cacheable(value = "policies", key = "#id")
     @Override
     public PolicyResponseDTO getPolicyById(Long id) {
         Policy policy = policyRepository.findById(id)
@@ -55,7 +55,7 @@ public class PolicyServiceImpl implements PolicyService {
         return PolicyMapper.toResponse(policy);
     }
 
-    @CacheEvict(value = { "policies", "policy" }, allEntries = true)
+    @CacheEvict(value = "policies", allEntries = true)
     @Override
     public PolicyResponseDTO updatePolicy(Long id, PolicyRequestDTO request) {
         Policy existingPolicy = policyRepository.findById(id)
@@ -73,7 +73,7 @@ public class PolicyServiceImpl implements PolicyService {
         return PolicyMapper.toResponse(updatedPolicy);
     }
 
-    @CacheEvict(value = { "policies", "policy" }, allEntries = true)
+    @CacheEvict(value = "policies", allEntries = true)
     @Override
     public void deletePolicy(Long id) {
         if (!policyRepository.existsById(id)) {

@@ -1,11 +1,17 @@
 spring:
+  # Cache configuration - using Redis for distributed caching with 10-minute TTL
   cache:
-    type: simple
+    type: redis
+    redis:
+      time-to-live: 600000  # 10 minutes in milliseconds
+  
+  # Database configuration - credentials must be provided via environment variables
+  # Do not hardcode database secrets in this file for production environments
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:h2:mem:testdb}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
 
   h2:
     console:
@@ -18,6 +24,13 @@ spring:
 
   flyway:
     enabled: false
+
+  # Redis configuration - host and port should be provided via environment variables
+  # Uses fallback defaults for local development (localhost:6379)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   # Mail credentials must be provided through environment variables.
   # Do not hardcode secrets in application.yml for production.

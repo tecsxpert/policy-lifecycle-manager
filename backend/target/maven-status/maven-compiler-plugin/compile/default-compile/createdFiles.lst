@@ -18,6 +18,7 @@ com\internship\tool\config\OpenApiConfig.class
 com\internship\tool\entity\FileMetadata.class
 com\internship\tool\repository\FileMetadataRepository.class
 com\internship\tool\service\FileService.class
+com\internship\tool\config\RedisConfig.class
 com\internship\tool\entity\FileMetadata$FileMetadataBuilder.class
 com\internship\tool\exception\ResourceNotFoundException.class
 com\internship\tool\controller\FileController.class
