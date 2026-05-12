@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8
+    container_name: policy-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: policydb
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_LOG_CONSOLE: "true"
+    ports:
+      - "3307:3306"
+    volumes:
+      # Persistent volume for database data
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - policy-network
+
+  # Redis Cache Service
+  redis:
+    image: redis:7
+    container_name: policy-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      # Persistent volume for Redis data
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - policy-network
+    command: redis-server --appendonly yes
+
+  # Spring Boot Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: policy-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      DB_URL: jdbc:mysql://mysql:3306/policydb
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_DRIVER: com.mysql.cj.jdbc.Driver
+      
+      # Redis configuration
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      
+      # Mail configuration (update with actual credentials)
+      MAIL_USERNAME: yourmail@gmail.com
+      MAIL_PASSWORD: yourpassword
+      
+      # JWT configuration
+      JWT_SECRET: yourjwtsecretkey0123456789012345
+      
+      # Server configuration
+      SERVER_PORT: 8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # Persistent volume for file uploads
+      - uploads-data:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger-ui/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - policy-network
+
+# Named volumes for persistence
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  uploads-data:
+    driver: local
+
+# Custom network for service communication
+networks:
+  policy-network:
+    driver: bridge
