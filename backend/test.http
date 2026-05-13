@@ -1,0 +1,109 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODUwNzg4OSwiZXhwIjoxNzc4NTk0Mjg5fQ.3lRqm1WgG9MBsBtCo57vdbw5WoDeAK2_11Eg81h7VsE
+
+### Authentication
+
+### TEST: LOGIN
+GET {{baseUrl}}/auth/login?username=admin
+
+### Policy APIs
+
+### TEST: GET ALL POLICIES WITH JWT
+GET {{baseUrl}}/policies
+Authorization: Bearer {{token}}
+
+### TEST: GET POLICY BY ID (VALID)
+GET {{baseUrl}}/policies/1
+Authorization: Bearer {{token}}
+
+### TEST: CREATE POLICY
+POST {{baseUrl}}/policies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "policyNumber": "POL003",
+  "policyName": "Health Insurance",
+  "policyType": "Health",
+  "premiumAmount": 5000,
+  "startDate": "2024-01-01",
+  "endDate": "2025-01-01",
+  "status": "ACTIVE"
+}
+
+### Validation tests
+
+### TEST: UNAUTHORIZED ACCESS (should return 401)
+GET {{baseUrl}}/policies
+
+### TEST: INVALID ID (should return 404)
+GET {{baseUrl}}/policies/999
+Authorization: Bearer {{token}}
+
+### TEST: INVALID STATUS (should return 400)
+POST {{baseUrl}}/policies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "policyNumber": "POL999",
+  "policyName": "Test Policy",
+  "policyType": "Test",
+  "premiumAmount": 1000,
+  "startDate": "2024-01-01",
+  "endDate": "2025-01-01",
+  "status": "WRONG"
+}
+
+### Cache tests
+
+### TEST: CACHE VERIFICATION (run twice, check logs for DB hit on first)
+GET {{baseUrl}}/policies
+Authorization: Bearer {{token}}
+
+### File upload tests
+
+### TEST: UPLOAD PDF FILE
+POST {{baseUrl}}/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ../test.pdf
+--WebAppBoundary--
+
+### TEST: UPLOAD INVALID TXT FILE (should return 400)
+POST {{baseUrl}}/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+< ../test.txt
+--WebAppBoundary--
+
+### TEST: DOWNLOAD FILE
+GET {{baseUrl}}/files/1
+Authorization: Bearer {{token}}
+
+### TEST: PREVIEW FILE
+GET {{baseUrl}}/files/preview/1
+Authorization: Bearer {{token}}
+
+### Security tests
+
+### TEST: UNAUTHORIZED FILE UPLOAD (should return 401)
+POST {{baseUrl}}/files/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ../test.pdf
+--WebAppBoundary--
