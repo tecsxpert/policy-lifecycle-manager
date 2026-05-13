@@ -3,6 +3,7 @@ package com.internship.tool.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -10,7 +11,9 @@ import java.time.LocalDate;
  * DTO returned by policy endpoints.
  */
 @Data
-public class PolicyResponseDTO {
+public class PolicyResponseDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Schema(example = "1", description = "Unique policy identifier (database ID)")
     private Long id;

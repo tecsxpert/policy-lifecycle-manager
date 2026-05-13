@@ -45,6 +45,15 @@ This document outlines comprehensive testing procedures for the Policy Lifecycle
 - **Second Request**: `GET /policies` → Uses cache (no DB log)
 - **Cache Eviction**: After POST create/update/delete → Cache cleared on next GET
 
+### Redis Cache Verification
+- Start Redis CLI:
+  - `docker exec -it policy-redis redis-cli`
+- List cached keys:
+  - `KEYS *`
+- Expected cache entries after requesting a policy by id:
+  - `policies::1`
+- Note: `PolicyResponseDTO` is updated to implement `Serializable` so Redis can store cached policy DTO objects.
+
 ## Email Testing
 
 ### Email Notifications
@@ -105,9 +114,12 @@ All errors return JSON:
 
 - **Preview in Browser**: `/files/preview/{id}` requires JWT token; direct browser access returns 401
 - **Cache Logs**: PolicyService logs "Fetching from DB..." only on cache miss
+- **Redis Cache Keys**: Cached policy entries appear with keys like `policies::1`
+- **Serializable DTOs**: `PolicyResponseDTO` implements `Serializable` so Redis caching works correctly
 - **Email Configuration**: Uses hardcoded Gmail credentials; replace for production
 - **Database**: H2 in-memory; data resets on restart
 - **File Storage**: Files stored in `backend/uploads/files/` directory
+- **Windows Host Access**: If `http://localhost:8080` behaves inconsistently on Windows Docker, use `http://127.0.0.1:8080`
 
 ## Testing Observations
 

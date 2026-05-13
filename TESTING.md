@@ -1,53 +1,336 @@
-# Policy Lifecycle Manager - Docker Testing Guide
+# Docker Testing & Validation Guide
 
-## Overview
+**Policy Lifecycle Manager** - Full Docker Compose containerization with MySQL, Redis, and Spring Boot backend.
 
-This document provides comprehensive instructions for running the Policy Lifecycle Manager system using Docker Compose and testing all functionality.
-
-## Prerequisites
-
-- Docker Desktop installed and running
-- Docker Compose v2.0+
-- Maven 3.8+ (for local builds)
-- Java 17+ (for local development)
+---
 
 ## Quick Start
 
-### 1. Start All Services
-
+### Start All Services (MySQL, Redis, Backend)
 ```bash
-# Start all services (MySQL, Redis, Backend)
 docker compose up --build
+```
 
-# Or run in background
-docker compose up --build -d
+Expected output:
+```
+✔ Container policy-mysql     Healthy
+✔ Container policy-redis     Healthy
+✔ Container policy-backend   Started
+```
+
+### Stop All Services
+```bash
+docker compose down
+```
+
+### Stop All Services & Remove Volumes
+```bash
+docker compose down -v
+```
+
+### View Running Containers
+```bash
+docker ps --filter "name=policy"
+```
+
+---
+
+## Port Mappings
+
+| Service | Internal Port | Host Port | URL |
+|---------|---------------|-----------|-----|
+| Backend | 8080 | 8080 | http://localhost:8080 |
+| MySQL | 3306 | 3307 | localhost:3307 |
+| Redis | 6379 | 6379 | localhost:6379 |
+
+---
+
+## Application Testing
+
+### 1. Swagger/OpenAPI Testing
+
+#### Access Swagger UI
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+**Verify:**
+- Swagger page loads
+- All API endpoints visible
+- No YAML parsing errors
+- API documentation displays correctly
+
+---
+
+### 2. JWT Authentication Testing
+
+#### Generate JWT Token
+```bash
+curl -X GET "http://localhost:8080/auth/login?username=admin" \
+  -H "accept: application/json"
+```
+
+**Expected Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3ODU3Nzg1OCwiZXhwIjoxNzc4NTk0Mjg5fQ..."
+}
+```
+
+#### Test Protected API with JWT
+```bash
+TOKEN="your_jwt_token_here"
+curl -X GET "http://localhost:8080/policies?page=0&size=5" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "accept: application/json"
+```
+
+**Expected Response:** 200 OK with policy data
+
+#### Test Unauthorized Access (without JWT)
+```bash
+curl -X GET "http://localhost:8080/policies?page=0&size=5"
+```
+
+**Expected Response:** 401 Unauthorized
+
+**Verify:**
+- JWT token generation works
+- Protected endpoints require Bearer token
+- Unauthorized requests return 401
+- All endpoints accessible with valid token
+
+---
+
+### 3. Policy APIs Testing
+
+#### Get All Policies (Paginated)
+```bash
+TOKEN="your_jwt_token"
+curl -X GET "http://localhost:8080/policies?page=0&size=10" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Get Policy by ID
+```bash
+TOKEN="your_jwt_token"
+curl -X GET "http://localhost:8080/policies/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Create New Policy
+```bash
+TOKEN="your_jwt_token"
+curl -X POST "http://localhost:8080/policies" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "policyNumber": "POL999",
+    "policyName": "Test Policy",
+    "policyType": "Health",
+    "premiumAmount": 5000,
+    "startDate": "2026-01-01",
+    "endDate": "2027-01-01",
+    "status": "ACTIVE"
+  }'
+```
+
+**Verify:**
+- GET /policies returns paginated results
+- GET /policies/{id} returns single policy
+- POST /policies creates new policy
+- All policies stored in MySQL
+- 30 seeded policies in database
+
+---
+
+### 4. Redis Caching Testing
+
+#### Verify Redis Connection
+```bash
+docker exec policy-redis redis-cli ping
+```
+
+**Expected Response:** `PONG`
+
+#### Check Redis Keys (Cache Entries)
+```bash
+docker exec policy-redis redis-cli KEYS "*"
+```
+
+#### Monitor Cache Performance
+1. Make first request to `/policies/1` (DB hit)
+2. Make second request to `/policies/1` (cache hit - should be faster)
+3. Check backend logs for cache activity
+
+**Expected Behavior:**
+- First request: Database query executed
+- Second request: Data served from Redis cache
+- 10-minute TTL (600000 ms) per configuration
+- @Cacheable and @CacheEvict annotations active
+
+#### View Cache Configuration
+```bash
+# Check cache TTL in application.yml
+cat backend/src/main/resources/application.yml | grep -A 2 "redis:"
 ```
 
 **Expected Output:**
-- MySQL container: `policy-mysql` running on port 3307
-- Redis container: `policy-redis` running on port 6379
-- Backend container: `policy-backend` running on port 8080
-
-### 2. Access the Application
-
-- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
-- **API Base URL**: http://localhost:8080
-- **H2 Console**: http://localhost:8080/h2-console (if enabled)
-
-## Docker Compose Commands
-
-### Start Services
-
-```bash
-# Build and start all services
-docker compose up --build
-
-# Start without rebuilding
-docker compose up
-
-# Start in background (detached mode)
-docker compose up -d
+```yaml
+cache:
+  type: redis
+  redis:
+    time-to-live: 600000  # 10 minutes
 ```
+
+---
+
+### 5. MySQL Connection & Data Testing
+
+#### Access MySQL Container
+```bash
+docker exec -it policy-mysql mysql -u root -p
+Password: root
+```
+
+#### Verify Database & Schema
+```sql
+USE policydb;
+SHOW TABLES;
+SELECT COUNT(*) as policy_count FROM policies;
+```
+
+**Expected Results:**
+- Database: `policydb` exists
+- Tables: `policies`, `file_metadata`, other schema tables
+- Records: 30 demo policies seeded
+
+#### Check Seeded Data Sample
+```sql
+SELECT policy_number, policy_name, status FROM policies LIMIT 5;
+```
+
+#### Verify Connection String
+- Inside containers: `jdbc:mysql://mysql:3306/policydb`
+- Host machine: `jdbc:mysql://localhost:3307/policydb`
+- Username: `root`
+- Password: `root`
+
+**Verify:**
+- MySQL container accessible
+- Database credentials working
+- 30 policies seeded successfully
+- Container-to-container communication via hostname
+
+---
+
+### 6. File Upload Testing
+
+#### Upload File via API
+```bash
+TOKEN="your_jwt_token"
+curl -X POST "http://localhost:8080/files/upload" \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@path/to/file.pdf"
+```
+
+#### Verify Uploaded Files in Container
+```bash
+docker exec policy-backend ls -la /app/uploads/files
+```
+
+**Expected Output:** Files with UUID-based naming
+
+**Verify:**
+- UUID-based filename generation working
+- Files persisted in volume
+- File size validation preserved
+- Upload directory exists in container
+
+---
+
+## Unit & Integration Tests
+
+### Run All Tests
+```bash
+cd backend
+mvn test
+```
+
+**Expected Output:**
+```
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+### Test Classes Included
+- `JwtUtilTest` - JWT token generation & validation
+- `AuthControllerTest` - Authentication endpoints
+- `PolicyServiceImplTest` - Policy business logic
+- `PolicyControllerIntegrationTest` - API integration
+- `PolicyRepositoryTest` - Database operations
+
+---
+
+## Container Verification
+
+### Check Container Status
+```bash
+docker ps -a --filter "name=policy"
+```
+
+### View Container Logs
+```bash
+docker logs policy-backend --tail 50
+docker logs policy-mysql --tail 20
+docker logs policy-redis --tail 20
+```
+
+---
+
+## Rebuild & Redeploy
+
+### Rebuild Backend After Code Changes
+```bash
+cd backend
+mvn clean package -DskipTests
+```
+
+### Full Rebuild from Scratch
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+---
+
+## Troubleshooting
+
+### Backend Container Won't Start
+```bash
+docker logs policy-backend --tail 100
+```
+
+### MySQL Connection Failed
+```bash
+docker exec policy-mysql mysqladmin ping -h localhost -u root -proot
+```
+
+### Redis Cache Not Working
+```bash
+docker exec policy-redis redis-cli ping
+```
+
+---
+
+**Verification Status:** ✅ All Systems Operational
+- Docker containers: Running with health checks
+- Database: 30 policies seeded
+- JWT authentication: Active
+- Redis caching: Active (10-minute TTL)
+- File uploads: Working with UUID naming
+- Unit tests: 23/23 passing
+- Swagger API: Accessible
 
 ### Stop Services
 

@@ -1,44 +1,59 @@
 spring:
-  # Cache configuration - using Redis for distributed caching with 10-minute TTL
+  # =========================================================
+  # Cache Configuration
+  # =========================================================
   cache:
     type: redis
     redis:
-      time-to-live: 600000  # 10 minutes in milliseconds
-  
-  # Database configuration - credentials must be provided via environment variables
-  # Do not hardcode database secrets in this file for production environments
-  datasource:
-    url: ${DB_URL:jdbc:h2:mem:testdb}
-    driver-class-name: ${DB_DRIVER:org.h2.Driver}
-    username: ${DB_USERNAME:sa}
-    password: ${DB_PASSWORD:}
+      time-to-live: 600000 # 10 minutes in milliseconds
 
+  # =========================================================
+  # Database Configuration
+  # =========================================================
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/policydb}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+
+  # =========================================================
+  # H2 Console (optional for local development)
+  # =========================================================
   h2:
     console:
       enabled: true
 
+  # =========================================================
+  # JPA / Hibernate
+  # =========================================================
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
+  # =========================================================
+  # Flyway
+  # =========================================================
   flyway:
     enabled: false
 
-  # Redis configuration - host and port should be provided via environment variables
-  # Uses fallback defaults for local development (localhost:6379)
+  # =========================================================
+  # Redis Configuration
+  # =========================================================
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
-  # Mail credentials must be provided through environment variables.
-  # Do not hardcode secrets in application.yml for production.
+  # =========================================================
+  # Mail Configuration
+  # =========================================================
   mail:
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
+
     properties:
       mail:
         smtp:
@@ -46,6 +61,8 @@ spring:
           starttls:
             enable: true
 
+# =========================================================
+# JWT Configuration
+# =========================================================
 jwt:
-  # JWT secret should come from an environment variable for secure configuration.
   secret: ${JWT_SECRET}
