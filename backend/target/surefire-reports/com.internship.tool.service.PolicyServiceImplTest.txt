@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.internship.tool.service.PolicyServiceImplTest
 -------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.575 s -- in com.internship.tool.service.PolicyServiceImplTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.957 s -- in com.internship.tool.service.PolicyServiceImplTest

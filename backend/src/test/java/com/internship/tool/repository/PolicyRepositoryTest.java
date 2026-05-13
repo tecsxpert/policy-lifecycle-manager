@@ -123,4 +123,34 @@ class PolicyRepositoryTest {
 
         assertFalse(policyRepository.existsById(saved.getId()), "Policy should no longer exist after delete");
     }
+
+    @Test
+    void shouldPopulateAuditTimestamps() throws InterruptedException {
+        Policy policy = Policy.builder()
+                .policyNumber("POL2007")
+                .policyName("Audit Test Plan")
+                .policyType("Test")
+                .premiumAmount(BigDecimal.valueOf(1000))
+                .startDate(LocalDate.of(2024, 10, 1))
+                .endDate(LocalDate.of(2025, 10, 1))
+                .status(PolicyStatus.ACTIVE)
+                .build();
+
+        // Save initial policy
+        Policy saved = policyRepository.save(policy);
+
+        assertNotNull(saved.getCreatedAt(), "Created timestamp should be populated");
+        assertNotNull(saved.getUpdatedAt(), "Updated timestamp should be populated");
+
+        // Wait a bit to ensure timestamp difference
+        Thread.sleep(10);
+
+        // Update policy to trigger updatedAt change
+        saved.setPolicyName("Updated Audit Test Plan");
+        Policy updated = policyRepository.save(saved);
+
+        assertNotNull(updated.getCreatedAt(), "Created timestamp should remain populated");
+        assertNotNull(updated.getUpdatedAt(), "Updated timestamp should remain populated");
+        assertEquals(saved.getCreatedAt(), updated.getCreatedAt(), "Created timestamp should not change on update");
+    }
 }
